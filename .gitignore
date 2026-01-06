@@ -1,0 +1,23 @@
+# Price cache (regenerated from API)
+data/prices.csv
+
+# Build output
+dist/
+
+# Node modules (if using build tools)
+node_modules/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Sensitive data
+*.env
+*.secrets
+
+# Temporary files
+*.tmp
+*.log
