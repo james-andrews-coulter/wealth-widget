@@ -30,8 +30,19 @@ function getDataPath() {
   const fm = getFileManager();
 
   if (isDevelopment()) {
-    // Development: Use local git repo
-    return CONFIG.gitRepoPath;
+    // Development: Try local git repo, fall back to Scriptable documents
+    try {
+      // Check if git repo path exists and is accessible
+      if (fm.fileExists(CONFIG.gitRepoPath)) {
+        return CONFIG.gitRepoPath;
+      }
+    } catch (e) {
+      // Path not accessible, fall through to Scriptable docs
+    }
+
+    // Fallback: Use Scriptable documents directory
+    const docsDir = fm.documentsDirectory();
+    return fm.joinPath(docsDir, CONFIG.iCloudFolderName);
   } else {
     // Production: Use iCloud
     const docsDir = fm.documentsDirectory();
@@ -58,13 +69,19 @@ async function ensureDataDirectory() {
   const fm = getFileManager();
   const dataPath = getDataPath();
 
-  if (!fm.fileExists(dataPath)) {
-    fm.createDirectory(dataPath, true);
-  }
+  try {
+    if (!fm.fileExists(dataPath)) {
+      fm.createDirectory(dataPath, true);
+    }
 
-  // Wait for iCloud sync if needed
-  if (!isDevelopment() && !fm.isFileDownloaded(dataPath)) {
-    await fm.downloadFileFromiCloud(dataPath);
+    // Wait for iCloud sync if needed
+    if (!isDevelopment() && !fm.isFileDownloaded(dataPath)) {
+      await fm.downloadFileFromiCloud(dataPath);
+    }
+  } catch (e) {
+    console.error("Could not ensure data directory: " + e);
+    // Directory might already exist or we don't have permissions
+    // Try to continue anyway
   }
 }
 
