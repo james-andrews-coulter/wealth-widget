@@ -1,6 +1,11 @@
 // widget.js - Main entry point for Wealth Widget
 // Orchestrates all modules to render portfolio widget
 
+// ⚠️ DO NOT RUN THIS FILE DIRECTLY IN SCRIPTABLE
+// This is a source file that requires building.
+// Run: npm run build
+// Then copy dist/widget.js to Scriptable
+
 // Main function
 async function main() {
   // Ensure data directory exists
