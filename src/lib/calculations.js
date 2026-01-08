@@ -129,7 +129,7 @@ function getFirstHoldingDate(holdings) {
   return firstDate;
 }
 
-// Build historical portfolio values with monthly sampling for performance
+// Build historical portfolio values with monthly sampling (lighter widget)
 async function getHistoricalPortfolioValues(holdings, eurRates) {
   var transactions = await readTransactions();
   if (transactions.length === 0) return [];
@@ -153,27 +153,12 @@ async function getHistoricalPortfolioValues(holdings, eurRates) {
   var today = new Date();
   var totalDays = Math.floor((today - firstDate) / (1000 * 60 * 60 * 24));
 
-  // Adaptive sampling based on time range
-  var now = new Date();
-  var sixMonthsAgo = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
-  var twoYearsAgo = new Date(now.getTime() - 730 * 24 * 60 * 60 * 1000);
-
-  // Sample more frequently for recent data
-  var samplingIntervals = [];
+  // Use monthly sampling for all data points (lighter widget)
   var currentDate = new Date(firstDate);
+  var interval = 30; // Monthly sampling
 
   while (currentDate <= today) {
     var dateStr = currentDate.toISOString().split("T")[0];
-
-    // Determine sampling interval based on date
-    var interval;
-    if (currentDate >= sixMonthsAgo) {
-      interval = 1; // Daily for last 6 months
-    } else if (currentDate >= twoYearsAgo) {
-      interval = 7; // Weekly for 6 months - 2 years
-    } else {
-      interval = 30; // Monthly for >2 years ago
-    }
 
     // Calculate portfolio value at this date
     var holdingsAtDate = {};

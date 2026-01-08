@@ -31,15 +31,45 @@ function drawGraph(context, data, x, y, width, height, leftMargin, bottomMargin)
   context.addPath(axisPath);
   context.strokePath();
 
-  // Draw year ticks on X-axis
+  // Draw year ticks on X-axis with smart spacing
   var years = {};
+  var yearList = [];
   for (var i = 0; i < data.length; i++) {
     var yr = data[i].date.substring(0, 4);
-    if (!years[yr]) years[yr] = i;
+    if (!years[yr]) {
+      years[yr] = i;
+      yearList.push(parseInt(yr));
+    }
   }
 
-  context.setFont(Font.systemFont(7));
-  for (var yr in years) {
+  // Sort years chronologically
+  yearList.sort(function(a, b) { return a - b; });
+
+  // Smart tick spacing: calculate optimal interval based on range
+  var yearSpan = yearList.length;
+  var tickInterval = 1;
+  var maxTicks = 6; // Maximum number of ticks to show
+
+  if (yearSpan > maxTicks) {
+    // Calculate interval to keep ticks under max
+    tickInterval = Math.ceil(yearSpan / maxTicks);
+  }
+
+  // Select which years to display
+  var displayYears = [];
+  for (var i = 0; i < yearList.length; i += tickInterval) {
+    displayYears.push(yearList[i]);
+  }
+
+  // Always include the last year if not already included
+  var lastYear = yearList[yearList.length - 1];
+  if (displayYears.indexOf(lastYear) === -1) {
+    displayYears.push(lastYear);
+  }
+
+  context.setFont(Font.systemFont(6));
+  for (var i = 0; i < displayYears.length; i++) {
+    var yr = displayYears[i].toString();
     var idx = years[yr];
     var tickX = graphX + (idx / (data.length - 1)) * graphWidth;
     context.drawText(yr, new Point(tickX - 8, y + graphHeight + 2));
