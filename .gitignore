@@ -1,9 +1,6 @@
 # Price cache (regenerated from API)
 data/prices.csv
 
-# Build output
-dist/
-
 # Node modules (if using build tools)
 node_modules/
 
