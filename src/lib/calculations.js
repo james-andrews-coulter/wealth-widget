@@ -130,7 +130,7 @@ function getFirstHoldingDate(holdings) {
 }
 
 // Build historical portfolio values with monthly sampling (lighter widget)
-async function getHistoricalPortfolioValues(holdings, eurRates) {
+async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolioValue) {
   var transactions = await readTransactions();
   if (transactions.length === 0) return [];
 
@@ -192,6 +192,24 @@ async function getHistoricalPortfolioValues(holdings, eurRates) {
 
     // Advance by interval
     currentDate = new Date(currentDate.getTime() + interval * 24 * 60 * 60 * 1000);
+  }
+
+  // FIX: Always add today's current portfolio value as the final data point
+  // This ensures YTD, MTD-1, and other metrics use up-to-date values
+  var todayStr = today.toISOString().split("T")[0];
+  var hasTodayValue = false;
+
+  for (var i = 0; i < portfolioValues.length; i++) {
+    if (portfolioValues[i].date === todayStr) {
+      // Update with current value if we already have today
+      portfolioValues[i].value = currentPortfolioValue;
+      hasTodayValue = true;
+      break;
+    }
+  }
+
+  if (!hasTodayValue && currentPortfolioValue !== null && currentPortfolioValue !== undefined) {
+    portfolioValues.push({ date: todayStr, value: currentPortfolioValue });
   }
 
   return portfolioValues;
