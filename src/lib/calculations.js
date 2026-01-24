@@ -88,14 +88,18 @@ function calculateMTD1PL(historicalValues) {
   var lastMonthEndStr = lastMonthEnd.toISOString().split("T")[0];
   var lastMonthStartStr = lastMonthStart.toISOString().split("T")[0];
 
-  var startValue = null, endValue = null;
+  var startData = null, endData = null;
   for (var i = 0; i < historicalValues.length; i++) {
-    if (historicalValues[i].date <= lastMonthStartStr) startValue = historicalValues[i].value;
-    if (historicalValues[i].date <= lastMonthEndStr) endValue = historicalValues[i].value;
+    if (historicalValues[i].date <= lastMonthStartStr) startData = historicalValues[i];
+    if (historicalValues[i].date <= lastMonthEndStr) endData = historicalValues[i];
   }
 
-  if (startValue === null || endValue === null) return null;
-  return endValue - startValue;
+  if (startData === null || endData === null) return null;
+
+  // Calculate P/L at each point (value - cost) and return the change in P/L
+  var startPL = startData.value - startData.cost;
+  var endPL = endData.value - endData.cost;
+  return endPL - startPL;
 }
 
 // Calculate YTD (year-to-date) P/L from historical values
@@ -106,15 +110,20 @@ function calculateYTDPL(historicalValues) {
   var yearStart = new Date(now.getFullYear(), 0, 1);
   var yearStartStr = yearStart.toISOString().split("T")[0];
 
-  var startValue = null;
+  var startData = null;
   for (var i = 0; i < historicalValues.length; i++) {
-    if (historicalValues[i].date <= yearStartStr) startValue = historicalValues[i].value;
+    if (historicalValues[i].date <= yearStartStr) startData = historicalValues[i];
   }
 
-  var endValue = historicalValues[historicalValues.length - 1].value;
-  if (startValue === null) startValue = historicalValues[0].value;
+  var endData = historicalValues[historicalValues.length - 1];
 
-  return endValue - startValue;
+  // If no data at year start, use first available data point
+  if (startData === null) startData = historicalValues[0];
+
+  // Calculate P/L at each point (value - cost) and return the change in P/L
+  var startPL = startData.value - startData.cost;
+  var endPL = endData.value - endData.cost;
+  return endPL - startPL;
 }
 
 // Get first holding date from holdings list
@@ -130,7 +139,7 @@ function getFirstHoldingDate(holdings) {
 }
 
 // Build historical portfolio values with monthly sampling (lighter widget)
-async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolioValue) {
+async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolioValue, currentPortfolioCost) {
   var transactions = await readTransactions();
   if (transactions.length === 0) return [];
 
@@ -160,17 +169,24 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
   while (currentDate <= today) {
     var dateStr = currentDate.toISOString().split("T")[0];
 
-    // Calculate portfolio value at this date
+    // Calculate portfolio value and cost at this date
     var holdingsAtDate = {};
+    var costAtDate = {};
     for (var t = 0; t < transactions.length; t++) {
       if (transactions[t].date <= dateStr) {
         var sym = transactions[t].symbol;
-        if (!holdingsAtDate[sym]) holdingsAtDate[sym] = 0;
+        if (!holdingsAtDate[sym]) {
+          holdingsAtDate[sym] = 0;
+          costAtDate[sym] = 0;
+        }
         holdingsAtDate[sym] += transactions[t].quantity;
+        // Cost basis: quantity × purchase price
+        costAtDate[sym] += transactions[t].quantity * transactions[t].price;
       }
     }
 
     var dayValue = 0;
+    var dayCost = 0;
     var hasData = false;
     for (var sym in holdingsAtDate) {
       var histData = allHistorical[sym];
@@ -184,32 +200,39 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
       if (closestPrice !== null) {
         var eurRate = eurRates["USD"] || 1; // Assuming USD for simplicity
         dayValue += holdingsAtDate[sym] * closestPrice * eurRate;
+        // Convert cost to EUR using the same rate
+        dayCost += costAtDate[sym] * eurRate;
         hasData = true;
       }
     }
 
-    if (hasData) portfolioValues.push({ date: dateStr, value: dayValue });
+    if (hasData) portfolioValues.push({ date: dateStr, value: dayValue, cost: dayCost });
 
     // Advance by interval
     currentDate = new Date(currentDate.getTime() + interval * 24 * 60 * 60 * 1000);
   }
 
-  // FIX: Always add today's current portfolio value as the final data point
+  // FIX: Always add today's current portfolio value and cost as the final data point
   // This ensures YTD, MTD-1, and other metrics use up-to-date values
   var todayStr = today.toISOString().split("T")[0];
   var hasTodayValue = false;
 
   for (var i = 0; i < portfolioValues.length; i++) {
     if (portfolioValues[i].date === todayStr) {
-      // Update with current value if we already have today
+      // Update with current value and cost if we already have today
       portfolioValues[i].value = currentPortfolioValue;
+      portfolioValues[i].cost = currentPortfolioCost || 0;
       hasTodayValue = true;
       break;
     }
   }
 
   if (!hasTodayValue && currentPortfolioValue !== null && currentPortfolioValue !== undefined) {
-    portfolioValues.push({ date: todayStr, value: currentPortfolioValue });
+    portfolioValues.push({
+      date: todayStr,
+      value: currentPortfolioValue,
+      cost: currentPortfolioCost || 0
+    });
   }
 
   return portfolioValues;

@@ -89,8 +89,8 @@ async function main() {
   portfolio = calculatePortfolio(holdings, prices, eurRates);
 
   // Get historical values (with monthly sampling for performance)
-  // Pass current portfolio value to ensure today's value is included
-  historicalValues = await getHistoricalPortfolioValues(holdings, eurRates, portfolio.totalValueEUR);
+  // Pass current portfolio value and cost to ensure today's value is included
+  historicalValues = await getHistoricalPortfolioValues(holdings, eurRates, portfolio.totalValueEUR, portfolio.totalCostEUR);
 
   // Render widget or show menu
   if (config.runsInWidget) {
