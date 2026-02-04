@@ -1,4 +1,4 @@
-// Income Widget - Built 2026-02-04T08:57:41.979Z
+// Income Widget - Built 2026-02-04T22:57:20.862Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -6,11 +6,11 @@
 // Enables git-ready development with iCloud production deployment
 
 const CONFIG = {
-  transactionsFileName: "transactions.csv",
-  pricesFileName: "prices.csv",
-  currencySymbol: "EUR",
-  iCloudFolderName: "WealthWidget",
-  gitRepoPath: "/Users/jamesalexander/wealth_widget/data"
+  transactionsFileName: 'transactions.csv',
+  pricesFileName: 'prices.csv',
+  currencySymbol: 'EUR',
+  iCloudFolderName: 'WealthWidget',
+  gitRepoPath: '/Users/jamesalexander/wealth_widget/data'
 };
 
 // Detect if running in development (local Mac) or production (iPhone/widget)
@@ -76,7 +76,7 @@ async function ensureDataDirectory() {
       await fm.downloadFileFromiCloud(dataPath);
     }
   } catch (e) {
-    console.error("Could not ensure data directory: " + e);
+    console.error('Could not ensure data directory: ' + e);
     // Directory might already exist or we don't have permissions
     // Try to continue anyway
   }
@@ -90,38 +90,38 @@ async function ensureDataDirectory() {
 
 // Color scheme with dynamic light/dark mode support
 const COLORS = {
-  bg: Color.dynamic(new Color("#FFFFFF"), new Color("#1C1C1E")),
-  background: Color.dynamic(new Color("#FFFFFF"), new Color("#1C1C1E")),
+  bg: Color.dynamic(new Color('#FFFFFF'), new Color('#1C1C1E')),
+  background: Color.dynamic(new Color('#FFFFFF'), new Color('#1C1C1E')),
   text: Color.dynamic(Color.black(), Color.white()),
   textPrimary: Color.dynamic(Color.black(), Color.white()),
-  textSecondary: Color.dynamic(new Color("#6B7280"), Color.gray()),
-  green: new Color("#34C759"),
-  red: new Color("#FF3B30"),
-  graphLine: new Color("#34C759"),
-  graphLineNegative: new Color("#FF3B30"),
-  axisLine: Color.dynamic(new Color("#E5E5EA"), new Color("#3A3A3C"))
+  textSecondary: Color.dynamic(new Color('#6B7280'), Color.gray()),
+  green: new Color('#34C759'),
+  red: new Color('#FF3B30'),
+  graphLine: new Color('#34C759'),
+  graphLineNegative: new Color('#FF3B30'),
+  axisLine: Color.dynamic(new Color('#E5E5EA'), new Color('#3A3A3C'))
 };
 
 // Format number with K suffix for thousands, optional sign
 function formatNumber(value, showSign) {
-  if (value === null || value === undefined) return "N/A";
+  if (value === null || value === undefined) return 'N/A';
 
   var absValue = Math.abs(value);
-  var sign = "";
+  var sign = '';
 
-  if (showSign && value >= 0) sign = "+";
-  if (value < 0) sign = "-";
+  if (showSign && value >= 0) sign = '+';
+  if (value < 0) sign = '-';
 
   var formatted;
   if (absValue >= 1000) {
     var k = absValue / 1000;
     if (k >= 100) {
-      formatted = Math.round(k).toLocaleString("en-US") + "K";
+      formatted = Math.round(k).toLocaleString('en-US') + 'K';
     } else {
-      formatted = k.toFixed(1).replace(/\.0$/, "") + "K";
+      formatted = k.toFixed(1).replace(/\.0$/, '') + 'K';
     }
   } else {
-    formatted = Math.round(absValue).toLocaleString("en-US");
+    formatted = Math.round(absValue).toLocaleString('en-US');
   }
 
   return sign + formatted;
@@ -129,48 +129,48 @@ function formatNumber(value, showSign) {
 
 // Format percentage with optional sign
 function formatPercent(value, showSign) {
-  if (value === null || value === undefined) return "N/A";
+  if (value === null || value === undefined) return 'N/A';
 
-  var sign = "";
-  if (showSign && value >= 0) sign = "+";
-  if (value < 0) sign = "-";
+  var sign = '';
+  if (showSign && value >= 0) sign = '+';
+  if (value < 0) sign = '-';
 
-  return sign + Math.abs(value).toFixed(1) + "%";
+  return sign + Math.abs(value).toFixed(1) + '%';
 }
 
 // Format currency with EUR symbol
 function formatCurrency(value) {
-  if (value === null || value === undefined) return "N/A";
+  if (value === null || value === undefined) return 'N/A';
 
   var absValue = Math.abs(value);
-  var sign = value < 0 ? "-" : "";
+  var sign = value < 0 ? '-' : '';
 
   var formatted;
   if (absValue >= 1000) {
     var k = absValue / 1000;
     if (k >= 100) {
-      formatted = Math.round(k).toLocaleString("en-US") + "K";
+      formatted = Math.round(k).toLocaleString('en-US') + 'K';
     } else {
-      formatted = k.toFixed(1).replace(/\.0$/, "") + "K";
+      formatted = k.toFixed(1).replace(/\.0$/, '') + 'K';
     }
   } else {
-    formatted = Math.round(absValue).toLocaleString("en-US");
+    formatted = Math.round(absValue).toLocaleString('en-US');
   }
 
-  return sign + "€" + formatted;
+  return sign + '€' + formatted;
 }
 
 // Pad string to left with spaces
 function padLeft(str, len) {
   str = String(str);
-  while (str.length < len) str = " " + str;
+  while (str.length < len) str = ' ' + str;
   return str;
 }
 
 // Pad string to right with spaces
 function padRight(str, len) {
   str = String(str);
-  while (str.length < len) str = str + " ";
+  while (str.length < len) str = str + ' ';
   return str;
 }
 
@@ -188,17 +188,17 @@ function getChangeColor(value) {
 // -EUR suffix = EUR
 // Default = USD
 function getCurrencyFromSymbol(symbol) {
-  if (!symbol) return "USD";
+  if (!symbol) return 'USD';
   symbol = symbol.toUpperCase();
 
-  if (symbol.endsWith(".AS") || symbol.endsWith(".MI")) return "EUR";
-  if (symbol.endsWith(".L")) return "GBP";
-  if (symbol.includes("-EUR")) return "EUR";
-  if (symbol.includes("-GBP")) return "GBP";
-  if (symbol.includes("-USD")) return "USD";
+  if (symbol.endsWith('.AS') || symbol.endsWith('.MI')) return 'EUR';
+  if (symbol.endsWith('.L')) return 'GBP';
+  if (symbol.includes('-EUR')) return 'EUR';
+  if (symbol.includes('-GBP')) return 'GBP';
+  if (symbol.includes('-USD')) return 'USD';
 
   // US stocks (no suffix)
-  return "USD";
+  return 'USD';
 }
 
 
@@ -214,7 +214,7 @@ async function readTransactions() {
 
   // Create file if it doesn't exist
   if (!fm.fileExists(transactionsPath)) {
-    fm.writeString(transactionsPath, "symbol,quantity,price,date\n");
+    fm.writeString(transactionsPath, 'symbol,quantity,price,date\n');
     return [];
   }
 
@@ -224,15 +224,15 @@ async function readTransactions() {
   }
 
   const csvContent = fm.readString(transactionsPath);
-  const lines = csvContent.trim().split("\n");
+  const lines = csvContent.trim().split('\n');
   const transactions = [];
 
   // Parse CSV (skip header row)
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (line === "") continue;
+    if (line === '') continue;
 
-    const parts = line.split(",");
+    const parts = line.split(',');
     if (parts.length >= 4) {
       transactions.push({
         symbol: parts[0].trim().toUpperCase(),
@@ -293,14 +293,14 @@ function writeTransaction(symbol, quantity, price, date) {
   const fm = getFileManager();
   const transactionsPath = getTransactionsPath();
 
-  let content = "";
+  let content = '';
   if (!fm.fileExists(transactionsPath)) {
-    content = "symbol,quantity,price,date\n";
+    content = 'symbol,quantity,price,date\n';
   } else {
     content = fm.readString(transactionsPath);
   }
 
-  content += symbol.toUpperCase() + "," + quantity + "," + price + "," + date + "\n";
+  content += symbol.toUpperCase() + ',' + quantity + ',' + price + ',' + date + '\n';
   fm.writeString(transactionsPath, content);
 }
 
@@ -319,16 +319,16 @@ async function readPrices() {
   }
 
   const csvContent = fm.readString(pricesPath);
-  const lines = csvContent.trim().split("\n");
+  const lines = csvContent.trim().split('\n');
   const priceMap = {};
 
   // Parse CSV (skip header row)
   // Format: ticker,date,price
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (line === "") continue;
+    if (line === '') continue;
 
-    const parts = line.split(",");
+    const parts = line.split(',');
     if (parts.length >= 3) {
       const ticker = parts[0].trim().toUpperCase();
       const date = parts[1].trim();
@@ -358,9 +358,9 @@ async function appendPrices(newPrices) {
   const fm = getFileManager();
   const pricesPath = getPricesPath();
 
-  let content = "";
+  let content = '';
   if (!fm.fileExists(pricesPath)) {
-    content = "ticker,date,price\n";
+    content = 'ticker,date,price\n';
   } else {
     content = fm.readString(pricesPath);
   }
@@ -408,7 +408,7 @@ async function readIncomeWidgetState() {
   try {
     const fm = getFileManager();
     const dataPath = getDataPath();
-    const statePath = fm.joinPath(dataPath, "income-widget-state.json");
+    const statePath = fm.joinPath(dataPath, 'income-widget-state.json');
 
     if (!fm.fileExists(statePath)) {
       return { yearOffset: 0 };
@@ -418,7 +418,7 @@ async function readIncomeWidgetState() {
     const state = JSON.parse(content);
     return state;
   } catch (error) {
-    console.error("Error reading income widget state:", error);
+    console.error('Error reading income widget state:', error);
     return { yearOffset: 0 };
   }
 }
@@ -428,12 +428,12 @@ async function writeIncomeWidgetState(state) {
   try {
     const fm = getFileManager();
     const dataPath = getDataPath();
-    const statePath = fm.joinPath(dataPath, "income-widget-state.json");
+    const statePath = fm.joinPath(dataPath, 'income-widget-state.json');
 
     const content = JSON.stringify(state, null, 2);
     fm.writeString(statePath, content);
   } catch (error) {
-    console.error("Error writing income widget state:", error);
+    console.error('Error writing income widget state:', error);
   }
 }
 
@@ -445,11 +445,11 @@ async function writeIncomeWidgetState(state) {
 
 // Fetch current price for a single stock
 async function fetchStockPrice(symbol) {
-  const url = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol + "?interval=1d&range=1d";
+  const url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '?interval=1d&range=1d';
 
   try {
     const request = new Request(url);
-    request.headers = { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)" };
+    request.headers = { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)' };
     const response = await request.loadJSON();
 
     if (response.chart && response.chart.result && response.chart.result[0]) {
@@ -462,13 +462,13 @@ async function fetchStockPrice(symbol) {
         price: currentPrice,
         previousClose: previousClose,
         change: currentPrice - previousClose,
-        currency: meta.currency || "USD",
+        currency: meta.currency || 'USD',
         marketState: meta.marketState,
         error: false
       };
     }
 
-    throw new Error("Invalid response");
+    throw new Error('Invalid response');
   } catch (error) {
     return { symbol: symbol, price: null, error: true };
   }
@@ -478,11 +478,11 @@ async function fetchStockPrice(symbol) {
 async function fetchHistoricalData(symbol, startDate) {
   const start = Math.floor(new Date(startDate).getTime() / 1000);
   const end = Math.floor(Date.now() / 1000);
-  const url = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol + "?period1=" + start + "&period2=" + end + "&interval=1d";
+  const url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '?period1=' + start + '&period2=' + end + '&interval=1d';
 
   try {
     const request = new Request(url);
-    request.headers = { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)" };
+    request.headers = { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)' };
     const response = await request.loadJSON();
 
     if (response.chart && response.chart.result && response.chart.result[0]) {
@@ -511,13 +511,13 @@ async function fetchHistoricalData(symbol, startDate) {
 
 // Fetch EUR exchange rate for a currency
 async function getEURRate(currency) {
-  if (currency === "EUR") return 1;
+  if (currency === 'EUR') return 1;
 
-  const url = "https://query1.finance.yahoo.com/v8/finance/chart/" + currency + "EUR=X?interval=1d&range=1d";
+  const url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + currency + 'EUR=X?interval=1d&range=1d';
 
   try {
     const request = new Request(url);
-    request.headers = { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)" };
+    request.headers = { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)' };
     const response = await request.loadJSON();
 
     if (response.chart && response.chart.result && response.chart.result[0]) {
@@ -666,8 +666,8 @@ function calculateMTD1PL(historicalValues) {
   var now = new Date();
   var lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
   var lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  var lastMonthEndStr = lastMonthEnd.toISOString().split("T")[0];
-  var lastMonthStartStr = lastMonthStart.toISOString().split("T")[0];
+  var lastMonthEndStr = lastMonthEnd.toISOString().split('T')[0];
+  var lastMonthStartStr = lastMonthStart.toISOString().split('T')[0];
 
   var startData = null, endData = null;
   for (var i = 0; i < historicalValues.length; i++) {
@@ -689,7 +689,7 @@ function calculateYTDPL(historicalValues) {
 
   var now = new Date();
   var yearStart = new Date(now.getFullYear(), 0, 1);
-  var yearStartStr = yearStart.toISOString().split("T")[0];
+  var yearStartStr = yearStart.toISOString().split('T')[0];
 
   var startData = null;
   for (var i = 0; i < historicalValues.length; i++) {
@@ -793,7 +793,7 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
   sampleDates.sort(function(a, b) { return a - b; });
   var uniqueDates = [];
   for (var i = 0; i < sampleDates.length; i++) {
-    var dateStr = sampleDates[i].toISOString().split("T")[0];
+    var dateStr = sampleDates[i].toISOString().split('T')[0];
     if (uniqueDates.length === 0 || uniqueDates[uniqueDates.length - 1] !== dateStr) {
       uniqueDates.push(dateStr);
     }
@@ -848,7 +848,7 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
 
   // FIX: Always add today's current portfolio value and cost as the final data point
   // This ensures YTD, MTD-1, and other metrics use up-to-date values
-  var todayStr = today.toISOString().split("T")[0];
+  var todayStr = today.toISOString().split('T')[0];
   var hasTodayValue = false;
 
   for (var i = 0; i < portfolioValues.length; i++) {
@@ -913,8 +913,8 @@ async function calculateMonthlyPL(year, allHistoricalPrices, eurRates) {
 
     var monthStart = new Date(year, month - 1, 1);
     var monthEnd = new Date(year, month, 0); // Last day of month
-    var monthStartStr = monthStart.toISOString().split("T")[0];
-    var monthEndStr = monthEnd.toISOString().split("T")[0];
+    var monthStartStr = monthStart.toISOString().split('T')[0];
+    var monthEndStr = monthEnd.toISOString().split('T')[0];
 
     // Calculate holdings and cost at month boundaries
     var holdingsAtStart = {};
@@ -1038,8 +1038,8 @@ async function calculateStockAttribution(year, allHistoricalPrices, eurRates) {
   // Calculate monthly P/L per stock for the entire year
   var yearStart = new Date(year, 0, 1);
   var yearEnd = new Date(year, 11, 31);
-  var yearStartStr = yearStart.toISOString().split("T")[0];
-  var yearEndStr = yearEnd.toISOString().split("T")[0];
+  var yearStartStr = yearStart.toISOString().split('T')[0];
+  var yearEndStr = yearEnd.toISOString().split('T')[0];
 
   for (var sym in stockYearlyPL) {
     // Calculate holdings and cost at year boundaries
@@ -1121,6 +1121,59 @@ async function calculateStockAttribution(year, allHistoricalPrices, eurRates) {
   });
 
   return stockList;
+}
+
+// Calculate YTD and MTD-1 using the same method as income widget
+// This is the single source of truth for these metrics across both widgets
+async function calculateYTDandMTD1(symbols) {
+  var currentYear = new Date().getFullYear();
+  var currentMonth = new Date().getMonth() + 1;
+
+  // Fetch historical prices from Dec 1 of previous year (same as income widget)
+  var histStartDate = new Date(currentYear - 1, 11, 1);
+  var allHistoricalPrices = await fetchMultipleHistoricalBatched(symbols, histStartDate);
+
+  // Ensure we have EUR rates for all needed currencies
+  // Use standardized currency codes to avoid GBp vs GBP mismatch
+  var standardCurrencies = ['USD', 'GBP', 'EUR'];
+  var eurRates = await fetchMultipleEURRates(standardCurrencies);
+
+  // Calculate monthly P/L for current year
+  var monthlyPL = await calculateMonthlyPL(currentYear, allHistoricalPrices, eurRates);
+
+  // YTD = sum of all completed months plus current month
+  var ytdPL = 0;
+  for (var i = 0; i < monthlyPL.length; i++) {
+    if (monthlyPL[i].hasData) {
+      ytdPL += monthlyPL[i].value;
+    }
+  }
+
+  // MTD-1 = last month's P/L
+  var mtd1PL = null;
+  if (currentMonth > 1) {
+    // Normal case: get previous month from current year
+    var lastMonthData = monthlyPL[currentMonth - 2]; // 0-indexed
+    if (lastMonthData && lastMonthData.hasData) {
+      mtd1PL = lastMonthData.value;
+    }
+  } else {
+    // January edge case: get December from previous year
+    // CRITICAL: Use the same standardized eurRates (not live API rates which may have "GBp")
+    var prevYearMonthlyPL = await calculateMonthlyPL(currentYear - 1, allHistoricalPrices, eurRates);
+    var decData = prevYearMonthlyPL[11]; // December is index 11
+    if (decData && decData.hasData) {
+      mtd1PL = decData.value;
+    }
+  }
+
+  return {
+    ytdPL: ytdPL,
+    mtd1PL: mtd1PL,
+    monthlyPL: monthlyPL,
+    allHistoricalPrices: allHistoricalPrices,
+    eurRates: eurRates
+  };
 }
 
 
@@ -1320,7 +1373,7 @@ function drawBarChart(context, monthlyData, x, y, width, height, leftMargin, bot
   }
 
   // Draw month labels (J F M A M J J A S O N D)
-  var monthLabels = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+  var monthLabels = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
   context.setFont(Font.systemFont(10));
   context.setTextColor(COLORS.textSecondary);
 
@@ -1347,7 +1400,7 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   // Header
   var header = widget.addStack();
   header.layoutHorizontally();
-  var title = header.addText("Portfolio");
+  var title = header.addText('Portfolio');
   title.font = Font.boldSystemFont(16);
   title.textColor = COLORS.text;
   header.addSpacer();
@@ -1364,7 +1417,7 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   // Daily
   var dailyStack = plRow.addStack();
   dailyStack.layoutVertically();
-  var dailyLbl = dailyStack.addText("Day");
+  var dailyLbl = dailyStack.addText('Day');
   dailyLbl.font = Font.systemFont(9);
   dailyLbl.textColor = COLORS.textSecondary;
   var dailyVal = dailyStack.addText(formatNumber(portfolio.totalDayChangeEUR, true));
@@ -1376,7 +1429,7 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   // Month (MTD-1) - use pre-calculated value for consistency with income widget
   var monthStack = plRow.addStack();
   monthStack.layoutVertically();
-  var monthLbl = monthStack.addText("MTD-1");
+  var monthLbl = monthStack.addText('MTD-1');
   monthLbl.font = Font.systemFont(9);
   monthLbl.textColor = COLORS.textSecondary;
   var monthVal = monthStack.addText(formatNumber(mtd1PL, true));
@@ -1388,7 +1441,7 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   // YTD - use pre-calculated value for consistency with income widget
   var ytdStack = plRow.addStack();
   ytdStack.layoutVertically();
-  var ytdLbl = ytdStack.addText("YTD");
+  var ytdLbl = ytdStack.addText('YTD');
   ytdLbl.font = Font.systemFont(9);
   ytdLbl.textColor = COLORS.textSecondary;
   var ytdVal = ytdStack.addText(formatNumber(ytdPL, true));
@@ -1400,7 +1453,7 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   // All Time
   var allTimeStack = plRow.addStack();
   allTimeStack.layoutVertically();
-  var allTimeLbl = allTimeStack.addText("All");
+  var allTimeLbl = allTimeStack.addText('All');
   allTimeLbl.font = Font.systemFont(9);
   allTimeLbl.textColor = COLORS.textSecondary;
   var allTimeVal = allTimeStack.addText(formatNumber(portfolio.totalProfitLossEUR, true));
@@ -1428,37 +1481,37 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   var hdrRow = widget.addStack();
   hdrRow.layoutHorizontally();
 
-  var h1 = hdrRow.addText(padRight("Symbol", 6));
+  var h1 = hdrRow.addText(padRight('Symbol', 6));
   h1.font = Font.boldMonospacedSystemFont(9);
   h1.textColor = COLORS.textSecondary;
 
   hdrRow.addSpacer();
 
-  var h2 = hdrRow.addText(padLeft("Value", 7));
+  var h2 = hdrRow.addText(padLeft('Value', 7));
   h2.font = Font.boldMonospacedSystemFont(9);
   h2.textColor = COLORS.textSecondary;
 
   hdrRow.addSpacer();
 
-  var h3 = hdrRow.addText(padLeft("P/L", 6));
+  var h3 = hdrRow.addText(padLeft('P/L', 6));
   h3.font = Font.boldMonospacedSystemFont(9);
   h3.textColor = COLORS.textSecondary;
 
   hdrRow.addSpacer();
 
-  var h4 = hdrRow.addText(padLeft("A%", 5));
+  var h4 = hdrRow.addText(padLeft('A%', 5));
   h4.font = Font.boldMonospacedSystemFont(9);
   h4.textColor = COLORS.textSecondary;
 
   hdrRow.addSpacer();
 
-  var h5 = hdrRow.addText(padLeft("Time", 5));
+  var h5 = hdrRow.addText(padLeft('Time', 5));
   h5.font = Font.boldMonospacedSystemFont(9);
   h5.textColor = COLORS.textSecondary;
 
   hdrRow.addSpacer();
 
-  var h6 = hdrRow.addText(padLeft("Wt%", 4));
+  var h6 = hdrRow.addText(padLeft('Wt%', 4));
   h6.font = Font.boldMonospacedSystemFont(9);
   h6.textColor = COLORS.textSecondary;
 
@@ -1490,19 +1543,19 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
 
     row.addSpacer();
 
-    var ayTxt = row.addText(padLeft(holding.annualizedYield != null ? holding.annualizedYield.toFixed(1) : "N/A", 5));
+    var ayTxt = row.addText(padLeft(holding.annualizedYield != null ? holding.annualizedYield.toFixed(1) : 'N/A', 5));
     ayTxt.font = Font.regularMonospacedSystemFont(9);
     ayTxt.textColor = getChangeColor(holding.annualizedYield);
 
     row.addSpacer();
 
-    var timeTxt = row.addText(padLeft(holding.holdTimeYears != null ? holding.holdTimeYears.toFixed(1) + "y" : "N/A", 5));
+    var timeTxt = row.addText(padLeft(holding.holdTimeYears != null ? holding.holdTimeYears.toFixed(1) + 'y' : 'N/A', 5));
     timeTxt.font = Font.regularMonospacedSystemFont(9);
     timeTxt.textColor = COLORS.textSecondary;
 
     row.addSpacer();
 
-    var wtTxt = row.addText(padLeft(holding.portfolioPct !== null ? Math.round(holding.portfolioPct).toString() : "N/A", 4));
+    var wtTxt = row.addText(padLeft(holding.portfolioPct !== null ? Math.round(holding.portfolioPct).toString() : 'N/A', 4));
     wtTxt.font = Font.regularMonospacedSystemFont(9);
     wtTxt.textColor = COLORS.textSecondary;
 
@@ -1514,7 +1567,7 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   // Footer
   var footer = widget.addStack();
   footer.layoutHorizontally();
-  var updTxt = footer.addText("Updated: " + new Date().toLocaleTimeString() + " (manual)");
+  var updTxt = footer.addText('Updated: ' + new Date().toLocaleTimeString() + ' (manual)');
   updTxt.font = Font.systemFont(8);
   updTxt.textColor = COLORS.textSecondary;
 
@@ -1524,33 +1577,33 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
 // Show interactive menu (adapted for Shortcuts integration)
 async function showInteractiveMenu(portfolio) {
   var alert = new Alert();
-  alert.title = "Stock Portfolio";
-  alert.message = "Total: " + formatNumber(portfolio.totalValueEUR, false) + "\nToday: " + formatNumber(portfolio.totalDayChangeEUR, true);
+  alert.title = 'Stock Portfolio';
+  alert.message = 'Total: ' + formatNumber(portfolio.totalValueEUR, false) + '\nToday: ' + formatNumber(portfolio.totalDayChangeEUR, true);
 
   // Option 1: Refresh via Shortcut
-  alert.addAction("🔄 Refresh Prices");
+  alert.addAction('🔄 Refresh Prices');
 
   // Option 2: Add via Shortcut
-  alert.addAction("➕ Add Transaction");
+  alert.addAction('➕ Add Transaction');
 
   // Option 3: Edit in Files app
-  alert.addAction("✏️ Edit Data");
+  alert.addAction('✏️ Edit Data');
 
-  alert.addCancelAction("Close");
+  alert.addCancelAction('Close');
 
   var choice = await alert.present();
 
   if (choice === 0) {
     // Refresh Prices - Open Shortcut
-    await Safari.open("shortcuts://run-shortcut?name=RefreshPrices");
+    await Safari.open('shortcuts://run-shortcut?name=RefreshPrices');
   } else if (choice === 1) {
     // Add Transaction - Open Shortcut
-    await Safari.open("shortcuts://run-shortcut?name=AddTransaction");
+    await Safari.open('shortcuts://run-shortcut?name=AddTransaction');
   } else if (choice === 2) {
     // Edit Data - Open transactions file
     const fm = getFileManager();
     const transactionsPath = getTransactionsPath();
-    await Safari.open("shareddocuments://" + transactionsPath);
+    await Safari.open('shareddocuments://' + transactionsPath);
   }
 }
 
@@ -1564,7 +1617,7 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   // Header row - no currency symbols
   var header = widget.addStack();
   header.layoutHorizontally();
-  var totalStr = (totalPL >= 0 ? "+" : "") + formatNumber(totalPL, false);
+  var totalStr = (totalPL >= 0 ? '+' : '') + formatNumber(totalPL, false);
   var totalText = header.addText(totalStr);
   totalText.font = Font.boldSystemFont(18);
   totalText.textColor = totalPL >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
@@ -1576,7 +1629,7 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   widget.addSpacer(2);
 
   // Subtitle: Average/month - no currency symbols
-  var avgStr = (avgPL >= 0 ? "+" : "") + formatNumber(avgPL, false) + "/mo";
+  var avgStr = (avgPL >= 0 ? '+' : '') + formatNumber(avgPL, false) + '/mo';
   var subtitleText = widget.addText(avgStr);
   subtitleText.font = Font.systemFont(10);
   subtitleText.textColor = COLORS.textSecondary;
@@ -1595,11 +1648,11 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   // Stock breakdown header - removed weight column
   var hdrStack = widget.addStack();
   hdrStack.layoutHorizontally();
-  var hdr1 = hdrStack.addText("Stock");
+  var hdr1 = hdrStack.addText('Stock');
   hdr1.font = Font.boldSystemFont(9);
   hdr1.textColor = COLORS.textSecondary;
   hdrStack.addSpacer();
-  var hdr2 = hdrStack.addText("P/L");
+  var hdr2 = hdrStack.addText('P/L');
   hdr2.font = Font.boldSystemFont(9);
   hdr2.textColor = COLORS.textSecondary;
 
@@ -1621,7 +1674,7 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
     stockStack.addSpacer();
 
     // Amount - no currency symbol
-    var plStr = (stock.yearlyPL >= 0 ? "+" : "") + formatNumber(stock.yearlyPL, false);
+    var plStr = (stock.yearlyPL >= 0 ? '+' : '') + formatNumber(stock.yearlyPL, false);
     var amountText = stockStack.addText(plStr);
     amountText.font = Font.regularMonospacedSystemFont(9);
     amountText.textColor = stock.yearlyPL >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
@@ -1679,9 +1732,9 @@ async function handleYearCycle(availableYears) {
 // Main function
 async function main() {
   // Debug: Show what paths we're using
-  console.log("isDevelopment: " + isDevelopment());
-  console.log("Data path: " + getDataPath());
-  console.log("Transactions path: " + getTransactionsPath());
+  console.log('isDevelopment: ' + isDevelopment());
+  console.log('Data path: ' + getDataPath());
+  console.log('Transactions path: ' + getTransactionsPath());
 
   // Ensure data directory exists
   await ensureDataDirectory();
@@ -1690,7 +1743,7 @@ async function main() {
   var state = await readIncomeWidgetState();
   var transactions = await readTransactions();
 
-  console.log("Transactions count: " + transactions.length);
+  console.log('Transactions count: ' + transactions.length);
 
   var availableYears = getYearsFromTransactions(transactions);
 
@@ -1703,14 +1756,14 @@ async function main() {
   // Sort years in descending order (newest first)
   availableYears.sort(function(a, b) { return b - a; });
 
-  console.log("Available years: " + JSON.stringify(availableYears));
-  console.log("Initial state.yearOffset: " + state.yearOffset);
+  console.log('Available years: ' + JSON.stringify(availableYears));
+  console.log('Initial state.yearOffset: ' + state.yearOffset);
 
   if (availableYears.length === 0) {
     // No transaction data
     var errorWidget = new ListWidget();
     errorWidget.backgroundColor = COLORS.background;
-    var errorText = errorWidget.addText("No transaction data found");
+    var errorText = errorWidget.addText('No transaction data found');
     errorText.textColor = COLORS.textPrimary;
     errorText.font = Font.systemFont(14);
     Script.setWidget(errorWidget);
@@ -1725,7 +1778,7 @@ async function main() {
   if (isInteraction) {
     await handleYearCycle(availableYears);
     state = await readIncomeWidgetState(); // Re-read updated state
-    console.log("After cycle state.yearOffset: " + state.yearOffset);
+    console.log('After cycle state.yearOffset: ' + state.yearOffset);
   }
 
   // Calculate which year to display
@@ -1741,7 +1794,7 @@ async function main() {
   }
 
   // Fetch EUR exchange rates
-  var currencies = ["USD", "GBP", "EUR"];
+  var currencies = ['USD', 'GBP', 'EUR'];
   var eurRates = await fetchMultipleEURRates(currencies);
 
   // Fetch historical prices for the entire year
@@ -1785,7 +1838,7 @@ async function main() {
   // Set the widget for home screen
   Script.setWidget(widget);
 
-  console.log("Displaying year: " + displayYear);
+  console.log('Displaying year: ' + displayYear);
 
   // DO NOT call widget.presentLarge() - that opens Scriptable
   // The widget will update silently on the home screen

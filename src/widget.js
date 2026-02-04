@@ -91,46 +91,11 @@ async function main() {
   // Get historical values for the chart
   historicalValues = await getHistoricalPortfolioValues(holdings, eurRates, portfolio.totalValueEUR, portfolio.totalCostEUR);
 
-  // Calculate YTD and MTD-1 using the SAME method as income widget
-  // This ensures consistency between both widgets
-  var currentYear = new Date().getFullYear();
-  var currentMonth = new Date().getMonth() + 1;
-
-  // Fetch historical prices from Dec 1 of previous year (same as income widget)
-  var histStartDate = new Date(currentYear - 1, 11, 1);
-  var allHistoricalPrices = await fetchMultipleHistoricalBatched(symbols, histStartDate);
-
-  // Ensure we have EUR rates for all needed currencies (same as income widget)
-  // The live API might return "GBp" instead of "GBP", so we need to ensure consistency
-  var standardCurrencies = ['USD', 'GBP', 'EUR'];
-  var monthlyEurRates = await fetchMultipleEURRates(standardCurrencies);
-
-  // Calculate monthly P/L for current year using standardized rates
-  var monthlyPL = await calculateMonthlyPL(currentYear, allHistoricalPrices, monthlyEurRates);
-
-  // YTD = sum of all completed months plus current month
-  var ytdPL = 0;
-  for (var i = 0; i < monthlyPL.length; i++) {
-    if (monthlyPL[i].hasData) {
-      ytdPL += monthlyPL[i].value;
-    }
-  }
-
-  // MTD-1 = last month's P/L (January if we're in February, etc.)
-  var mtd1PL = null;
-  if (currentMonth > 1) {
-    var lastMonthData = monthlyPL[currentMonth - 2]; // Array is 0-indexed, month-1 for last month, -1 more for 0-index
-    if (lastMonthData && lastMonthData.hasData) {
-      mtd1PL = lastMonthData.value;
-    }
-  } else {
-    // January - get December from previous year
-    var prevYearMonthlyPL = await calculateMonthlyPL(currentYear - 1, allHistoricalPrices, eurRates);
-    var decData = prevYearMonthlyPL[11]; // December is index 11
-    if (decData && decData.hasData) {
-      mtd1PL = decData.value;
-    }
-  }
+  // Calculate YTD and MTD-1 using the shared function
+  // This ensures consistency between wealth widget and income widget
+  var metrics = await calculateYTDandMTD1(symbols);
+  var ytdPL = metrics.ytdPL;
+  var mtd1PL = metrics.mtd1PL;
 
   // Render widget or show menu
   if (config.runsInWidget) {

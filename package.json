@@ -5,9 +5,9 @@
   "main": "src/widget.js",
   "type": "module",
   "scripts": {
-    "build": "node build.js",
-    "build:wealth": "node build.js",
-    "build:income": "node build.js",
+    "build": "node build.cjs",
+    "build:wealth": "node build.cjs",
+    "build:income": "node build.cjs",
     "watch": "nodemon --watch src -e js --exec npm run build",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",

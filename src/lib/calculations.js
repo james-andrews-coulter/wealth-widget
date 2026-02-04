@@ -544,6 +544,59 @@ async function calculateStockAttribution(year, allHistoricalPrices, eurRates) {
   return stockList;
 }
 
+// Calculate YTD and MTD-1 using the same method as income widget
+// This is the single source of truth for these metrics across both widgets
+async function calculateYTDandMTD1(symbols) {
+  var currentYear = new Date().getFullYear();
+  var currentMonth = new Date().getMonth() + 1;
+
+  // Fetch historical prices from Dec 1 of previous year (same as income widget)
+  var histStartDate = new Date(currentYear - 1, 11, 1);
+  var allHistoricalPrices = await fetchMultipleHistoricalBatched(symbols, histStartDate);
+
+  // Ensure we have EUR rates for all needed currencies
+  // Use standardized currency codes to avoid GBp vs GBP mismatch
+  var standardCurrencies = ['USD', 'GBP', 'EUR'];
+  var eurRates = await fetchMultipleEURRates(standardCurrencies);
+
+  // Calculate monthly P/L for current year
+  var monthlyPL = await calculateMonthlyPL(currentYear, allHistoricalPrices, eurRates);
+
+  // YTD = sum of all completed months plus current month
+  var ytdPL = 0;
+  for (var i = 0; i < monthlyPL.length; i++) {
+    if (monthlyPL[i].hasData) {
+      ytdPL += monthlyPL[i].value;
+    }
+  }
+
+  // MTD-1 = last month's P/L
+  var mtd1PL = null;
+  if (currentMonth > 1) {
+    // Normal case: get previous month from current year
+    var lastMonthData = monthlyPL[currentMonth - 2]; // 0-indexed
+    if (lastMonthData && lastMonthData.hasData) {
+      mtd1PL = lastMonthData.value;
+    }
+  } else {
+    // January edge case: get December from previous year
+    // CRITICAL: Use the same standardized eurRates (not live API rates which may have "GBp")
+    var prevYearMonthlyPL = await calculateMonthlyPL(currentYear - 1, allHistoricalPrices, eurRates);
+    var decData = prevYearMonthlyPL[11]; // December is index 11
+    if (decData && decData.hasData) {
+      mtd1PL = decData.value;
+    }
+  }
+
+  return {
+    ytdPL: ytdPL,
+    mtd1PL: mtd1PL,
+    monthlyPL: monthlyPL,
+    allHistoricalPrices: allHistoricalPrices,
+    eurRates: eurRates
+  };
+}
+
 export {
   calculatePortfolio,
   calculateMTD1PL,
@@ -552,5 +605,6 @@ export {
   getHistoricalPortfolioValues,
   getYearsFromTransactions,
   calculateMonthlyPL,
-  calculateStockAttribution
+  calculateStockAttribution,
+  calculateYTDandMTD1
 };
