@@ -238,10 +238,232 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
   return portfolioValues;
 }
 
+// Get list of years that have transaction data
+function getYearsFromTransactions(transactions) {
+  var years = {};
+  for (var i = 0; i < transactions.length; i++) {
+    var year = parseInt(transactions[i].date.substring(0, 4));
+    years[year] = true;
+  }
+  var yearList = Object.keys(years).map(function(y) { return parseInt(y); });
+  yearList.sort(function(a, b) { return a - b; });
+  return yearList;
+}
+
+// Calculate monthly P/L for a given year
+async function calculateMonthlyPL(year, allHistoricalPrices, eurRates) {
+  var transactions = await readTransactions();
+  if (transactions.length === 0) return [];
+
+  var monthlyPL = [];
+
+  // Process each month (1-12)
+  for (var month = 1; month <= 12; month++) {
+    var monthStart = new Date(year, month - 1, 1);
+    var monthEnd = new Date(year, month, 0); // Last day of month
+    var monthStartStr = monthStart.toISOString().split("T")[0];
+    var monthEndStr = monthEnd.toISOString().split("T")[0];
+
+    // Check if this month is in the future
+    var today = new Date();
+    if (monthStart > today) {
+      monthlyPL.push({ month: month, value: 0, hasData: false });
+      continue;
+    }
+
+    // Calculate holdings and cost at month boundaries
+    var holdingsAtStart = {};
+    var costAtStart = {};
+    var holdingsAtEnd = {};
+    var costAtEnd = {};
+
+    for (var t = 0; t < transactions.length; t++) {
+      var txDate = transactions[t].date;
+      var sym = transactions[t].symbol;
+
+      if (txDate <= monthStartStr) {
+        if (!holdingsAtStart[sym]) {
+          holdingsAtStart[sym] = 0;
+          costAtStart[sym] = 0;
+        }
+        holdingsAtStart[sym] += transactions[t].quantity;
+        costAtStart[sym] += transactions[t].quantity * transactions[t].price;
+      }
+
+      if (txDate <= monthEndStr) {
+        if (!holdingsAtEnd[sym]) {
+          holdingsAtEnd[sym] = 0;
+          costAtEnd[sym] = 0;
+        }
+        holdingsAtEnd[sym] += transactions[t].quantity;
+        costAtEnd[sym] += transactions[t].quantity * transactions[t].price;
+      }
+    }
+
+    // Calculate portfolio values at boundaries
+    var valueAtStart = 0;
+    var totalCostAtStart = 0;
+    var valueAtEnd = 0;
+    var totalCostAtEnd = 0;
+    var hasData = false;
+
+    // Start of month
+    for (var sym in holdingsAtStart) {
+      if (holdingsAtStart[sym] <= 0) continue;
+
+      var histData = allHistoricalPrices[sym];
+      if (!histData || histData.length === 0) continue;
+
+      var closestPrice = null;
+      for (var k = 0; k < histData.length; k++) {
+        var histDate = new Date(histData[k].date);
+        if (histDate <= monthStart) closestPrice = histData[k].price;
+      }
+
+      if (closestPrice !== null) {
+        var eurRate = eurRates["USD"] || 1;
+        valueAtStart += holdingsAtStart[sym] * closestPrice * eurRate;
+        totalCostAtStart += costAtStart[sym] * eurRate;
+        hasData = true;
+      }
+    }
+
+    // End of month
+    for (var sym in holdingsAtEnd) {
+      if (holdingsAtEnd[sym] <= 0) continue;
+
+      var histData = allHistoricalPrices[sym];
+      if (!histData || histData.length === 0) continue;
+
+      var closestPrice = null;
+      for (var k = 0; k < histData.length; k++) {
+        var histDate = new Date(histData[k].date);
+        if (histDate <= monthEnd) closestPrice = histData[k].price;
+      }
+
+      if (closestPrice !== null) {
+        var eurRate = eurRates["USD"] || 1;
+        valueAtEnd += holdingsAtEnd[sym] * closestPrice * eurRate;
+        totalCostAtEnd += costAtEnd[sym] * eurRate;
+        hasData = true;
+      }
+    }
+
+    // Calculate P/L (change in unrealized profit)
+    var startPL = valueAtStart - totalCostAtStart;
+    var endPL = valueAtEnd - totalCostAtEnd;
+    var monthPL = endPL - startPL;
+
+    monthlyPL.push({
+      month: month,
+      value: hasData ? monthPL : 0,
+      hasData: hasData
+    });
+  }
+
+  return monthlyPL;
+}
+
+// Calculate per-stock attribution for a year
+async function calculateStockAttribution(year, allHistoricalPrices, eurRates) {
+  var transactions = await readTransactions();
+  if (transactions.length === 0) return [];
+
+  var holdings = await readHoldings();
+  var stockYearlyPL = {};
+
+  // Initialize all symbols
+  for (var h = 0; h < holdings.length; h++) {
+    stockYearlyPL[holdings[h].symbol] = 0;
+  }
+
+  // Calculate monthly P/L per stock for the entire year
+  var yearStart = new Date(year, 0, 1);
+  var yearEnd = new Date(year, 11, 31);
+  var yearStartStr = yearStart.toISOString().split("T")[0];
+  var yearEndStr = yearEnd.toISOString().split("T")[0];
+
+  for (var sym in stockYearlyPL) {
+    // Calculate holdings and cost at year boundaries
+    var holdingsAtStart = 0;
+    var costAtStart = 0;
+    var holdingsAtEnd = 0;
+    var costAtEnd = 0;
+
+    for (var t = 0; t < transactions.length; t++) {
+      if (transactions[t].symbol !== sym) continue;
+
+      if (transactions[t].date <= yearStartStr) {
+        holdingsAtStart += transactions[t].quantity;
+        costAtStart += transactions[t].quantity * transactions[t].price;
+      }
+
+      if (transactions[t].date <= yearEndStr) {
+        holdingsAtEnd += transactions[t].quantity;
+        costAtEnd += transactions[t].quantity * transactions[t].price;
+      }
+    }
+
+    // Get prices at boundaries
+    var histData = allHistoricalPrices[sym];
+    if (!histData || histData.length === 0) continue;
+
+    var priceAtStart = null;
+    var priceAtEnd = null;
+
+    for (var k = 0; k < histData.length; k++) {
+      var histDate = new Date(histData[k].date);
+      if (histDate <= yearStart) priceAtStart = histData[k].price;
+      if (histDate <= yearEnd) priceAtEnd = histData[k].price;
+    }
+
+    if (priceAtStart !== null && priceAtEnd !== null) {
+      var eurRate = eurRates["USD"] || 1;
+
+      var valueAtStart = holdingsAtStart * priceAtStart * eurRate;
+      var totalCostAtStart = costAtStart * eurRate;
+      var valueAtEnd = holdingsAtEnd * priceAtEnd * eurRate;
+      var totalCostAtEnd = costAtEnd * eurRate;
+
+      var startPL = valueAtStart - totalCostAtStart;
+      var endPL = valueAtEnd - totalCostAtEnd;
+
+      stockYearlyPL[sym] = endPL - startPL;
+    }
+  }
+
+  // Convert to array and calculate percentages
+  var totalPL = 0;
+  for (var sym in stockYearlyPL) {
+    totalPL += stockYearlyPL[sym];
+  }
+
+  var stockList = [];
+  for (var sym in stockYearlyPL) {
+    var pl = stockYearlyPL[sym];
+    var pct = totalPL !== 0 ? (pl / totalPL) * 100 : 0;
+    stockList.push({
+      symbol: sym,
+      yearlyPL: pl,
+      percentage: pct
+    });
+  }
+
+  // Sort by P/L descending
+  stockList.sort(function(a, b) {
+    return b.yearlyPL - a.yearlyPL;
+  });
+
+  return stockList;
+}
+
 export {
   calculatePortfolio,
   calculateMTD1PL,
   calculateYTDPL,
   getFirstHoldingDate,
-  getHistoricalPortfolioValues
+  getHistoricalPortfolioValues,
+  getYearsFromTransactions,
+  calculateMonthlyPL,
+  calculateStockAttribution
 };
