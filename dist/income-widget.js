@@ -1,4 +1,4 @@
-// Income Widget - Built 2026-02-04T01:24:46.492Z
+// Income Widget - Built 2026-02-04T01:31:45.830Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -103,6 +103,7 @@ const COLORS = {
   green: new Color("#34C759"),
   red: new Color("#FF3B30"),
   graphLine: new Color("#34C759"),
+  graphLineNegative: new Color("#FF3B30"),
   axisLine: Color.dynamic(new Color("#E5E5EA"), new Color("#3A3A3C"))
 };
 
@@ -1004,15 +1005,6 @@ async function calculateStockAttribution(year, allHistoricalPrices, eurRates) {
 // === lib/chart-renderer.js ===
 // chart-renderer.js - Canvas-based line chart drawing
 // Extracted from current script lines 454-515
-
-const COLORS = {
-  background: new Color("#000000"),
-  textPrimary: new Color("#FFFFFF"),
-  textSecondary: new Color("#8E8E93"),
-  graphLine: new Color("#30D158"),
-  graphLineNegative: new Color("#FF453A"),
-  axisLine: new Color("#3A3A3C")
-};
 
 // Draw line chart with axes and labels
 function drawGraph(context, data, x, y, width, height, leftMargin, bottomMargin) {

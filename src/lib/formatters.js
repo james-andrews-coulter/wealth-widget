@@ -9,6 +9,7 @@ const COLORS = {
   green: new Color("#34C759"),
   red: new Color("#FF3B30"),
   graphLine: new Color("#34C759"),
+  graphLineNegative: new Color("#FF3B30"),
   axisLine: Color.dynamic(new Color("#E5E5EA"), new Color("#3A3A3C"))
 };
 

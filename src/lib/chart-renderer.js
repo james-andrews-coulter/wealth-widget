@@ -1,15 +1,6 @@
 // chart-renderer.js - Canvas-based line chart drawing
 // Extracted from current script lines 454-515
 
-const COLORS = {
-  background: new Color("#000000"),
-  textPrimary: new Color("#FFFFFF"),
-  textSecondary: new Color("#8E8E93"),
-  graphLine: new Color("#30D158"),
-  graphLineNegative: new Color("#FF453A"),
-  axisLine: new Color("#3A3A3C")
-};
-
 // Draw line chart with axes and labels
 function drawGraph(context, data, x, y, width, height, leftMargin, bottomMargin) {
   if (data.length < 2) return;
