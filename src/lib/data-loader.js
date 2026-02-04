@@ -197,6 +197,40 @@ function getPriceOnDate(priceMap, ticker, targetDate) {
   return closestPrice;
 }
 
+// Read income widget state (year offset)
+async function readIncomeWidgetState() {
+  try {
+    const fm = getFileManager();
+    const dataPath = getDataPath();
+    const statePath = fm.joinPath(dataPath, "income-widget-state.json");
+
+    if (!fm.fileExists(statePath)) {
+      return { yearOffset: 0 };
+    }
+
+    const content = fm.readString(statePath);
+    const state = JSON.parse(content);
+    return state;
+  } catch (error) {
+    console.error("Error reading income widget state:", error);
+    return { yearOffset: 0 };
+  }
+}
+
+// Write income widget state (year offset)
+async function writeIncomeWidgetState(state) {
+  try {
+    const fm = getFileManager();
+    const dataPath = getDataPath();
+    const statePath = fm.joinPath(dataPath, "income-widget-state.json");
+
+    const content = JSON.stringify(state, null, 2);
+    fm.writeString(statePath, content);
+  } catch (error) {
+    console.error("Error writing income widget state:", error);
+  }
+}
+
 export {
   readTransactions,
   readHoldings,
@@ -204,5 +238,7 @@ export {
   readPrices,
   appendPrices,
   getLatestPrice,
-  getPriceOnDate
+  getPriceOnDate,
+  readIncomeWidgetState,
+  writeIncomeWidgetState
 };
