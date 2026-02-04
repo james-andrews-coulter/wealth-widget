@@ -2,7 +2,8 @@
 // Extracted and adapted from current script lines 518-721
 
 // Create large widget with portfolio display
-async function createLargeWidget(portfolio, historicalValues) {
+// ytdPL and mtd1PL are pre-calculated using same method as income widget
+async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   var widget = new ListWidget();
   widget.backgroundColor = COLORS.bg;
   widget.setPadding(16, 8, 16, 8);
@@ -36,26 +37,24 @@ async function createLargeWidget(portfolio, historicalValues) {
 
   plRow.addSpacer();
 
-  // Month (MTD-1)
+  // Month (MTD-1) - use pre-calculated value for consistency with income widget
   var monthStack = plRow.addStack();
   monthStack.layoutVertically();
   var monthLbl = monthStack.addText("MTD-1");
   monthLbl.font = Font.systemFont(9);
   monthLbl.textColor = COLORS.textSecondary;
-  var monthlyPL = calculateMTD1PL(historicalValues);
-  var monthVal = monthStack.addText(formatNumber(monthlyPL, true));
+  var monthVal = monthStack.addText(formatNumber(mtd1PL, true));
   monthVal.font = Font.boldSystemFont(11);
-  monthVal.textColor = getChangeColor(monthlyPL);
+  monthVal.textColor = getChangeColor(mtd1PL);
 
   plRow.addSpacer();
 
-  // YTD
+  // YTD - use pre-calculated value for consistency with income widget
   var ytdStack = plRow.addStack();
   ytdStack.layoutVertically();
   var ytdLbl = ytdStack.addText("YTD");
   ytdLbl.font = Font.systemFont(9);
   ytdLbl.textColor = COLORS.textSecondary;
-  var ytdPL = calculateYTDPL(historicalValues);
   var ytdVal = ytdStack.addText(formatNumber(ytdPL, true));
   ytdVal.font = Font.boldSystemFont(11);
   ytdVal.textColor = getChangeColor(ytdPL);
