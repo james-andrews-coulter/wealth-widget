@@ -1,4 +1,4 @@
-// Income Widget - Built 2026-02-04T22:57:20.862Z
+// Income Widget - Built 2026-02-04T23:10:06.844Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -1129,6 +1129,9 @@ async function calculateYTDandMTD1(symbols) {
   var currentYear = new Date().getFullYear();
   var currentMonth = new Date().getMonth() + 1;
 
+  console.log('[WEALTH] calculateYTDandMTD1 called');
+  console.log('[WEALTH] currentYear: ' + currentYear + ', currentMonth: ' + currentMonth);
+
   // Fetch historical prices from Dec 1 of previous year (same as income widget)
   var histStartDate = new Date(currentYear - 1, 11, 1);
   var allHistoricalPrices = await fetchMultipleHistoricalBatched(symbols, histStartDate);
@@ -1138,8 +1141,18 @@ async function calculateYTDandMTD1(symbols) {
   var standardCurrencies = ['USD', 'GBP', 'EUR'];
   var eurRates = await fetchMultipleEURRates(standardCurrencies);
 
+  console.log('[WEALTH] eurRates: ' + JSON.stringify(eurRates));
+
   // Calculate monthly P/L for current year
   var monthlyPL = await calculateMonthlyPL(currentYear, allHistoricalPrices, eurRates);
+
+  // Log each month's value
+  console.log('[WEALTH] Monthly P/L breakdown:');
+  for (var m = 0; m < monthlyPL.length; m++) {
+    if (monthlyPL[m].hasData) {
+      console.log('[WEALTH]   Month ' + (m + 1) + ': ' + monthlyPL[m].value.toFixed(2));
+    }
+  }
 
   // YTD = sum of all completed months plus current month
   var ytdPL = 0;
@@ -1149,6 +1162,8 @@ async function calculateYTDandMTD1(symbols) {
     }
   }
 
+  console.log('[WEALTH] YTD total: ' + ytdPL.toFixed(2));
+
   // MTD-1 = last month's P/L
   var mtd1PL = null;
   if (currentMonth > 1) {
@@ -1157,6 +1172,7 @@ async function calculateYTDandMTD1(symbols) {
     if (lastMonthData && lastMonthData.hasData) {
       mtd1PL = lastMonthData.value;
     }
+    console.log('[WEALTH] MTD-1 (month ' + (currentMonth - 1) + '): ' + (mtd1PL !== null ? mtd1PL.toFixed(2) : 'null'));
   } else {
     // January edge case: get December from previous year
     // CRITICAL: Use the same standardized eurRates (not live API rates which may have "GBp")
@@ -1165,6 +1181,7 @@ async function calculateYTDandMTD1(symbols) {
     if (decData && decData.hasData) {
       mtd1PL = decData.value;
     }
+    console.log('[WEALTH] MTD-1 (December prev year): ' + (mtd1PL !== null ? mtd1PL.toFixed(2) : 'null'));
   }
 
   return {
@@ -1807,6 +1824,15 @@ async function main() {
   // Calculate monthly P/L
   var monthlyPL = await calculateMonthlyPL(displayYear, allHistoricalPrices, eurRates);
 
+  console.log('[INCOME] displayYear: ' + displayYear);
+  console.log('[INCOME] eurRates: ' + JSON.stringify(eurRates));
+  console.log('[INCOME] Monthly P/L breakdown:');
+  for (var m = 0; m < monthlyPL.length; m++) {
+    if (monthlyPL[m].hasData) {
+      console.log('[INCOME]   Month ' + (m + 1) + ': ' + monthlyPL[m].value.toFixed(2));
+    }
+  }
+
   // Calculate stock attribution
   var stockAttribution = await calculateStockAttribution(displayYear, allHistoricalPrices, eurRates);
 
@@ -1819,6 +1845,8 @@ async function main() {
       completedMonths++;
     }
   }
+
+  console.log('[INCOME] YTD total: ' + totalPL.toFixed(2));
 
   var avgPL = completedMonths > 0 ? totalPL / completedMonths : 0;
 

@@ -101,6 +101,15 @@ async function main() {
   // Calculate monthly P/L
   var monthlyPL = await calculateMonthlyPL(displayYear, allHistoricalPrices, eurRates);
 
+  console.log('[INCOME] displayYear: ' + displayYear);
+  console.log('[INCOME] eurRates: ' + JSON.stringify(eurRates));
+  console.log('[INCOME] Monthly P/L breakdown:');
+  for (var m = 0; m < monthlyPL.length; m++) {
+    if (monthlyPL[m].hasData) {
+      console.log('[INCOME]   Month ' + (m + 1) + ': ' + monthlyPL[m].value.toFixed(2));
+    }
+  }
+
   // Calculate stock attribution
   var stockAttribution = await calculateStockAttribution(displayYear, allHistoricalPrices, eurRates);
 
@@ -113,6 +122,8 @@ async function main() {
       completedMonths++;
     }
   }
+
+  console.log('[INCOME] YTD total: ' + totalPL.toFixed(2));
 
   var avgPL = completedMonths > 0 ? totalPL / completedMonths : 0;
 
