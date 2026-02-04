@@ -116,7 +116,7 @@ This dual-path architecture is implemented in `src/lib/config.js` functions: `is
 
 ### Formatting Rules
 
-**Chart Y-axis labels**: Never include currency symbols (€, $) or percentage symbols (%) on chart axis labels. Use plain numbers with K suffix for thousands (e.g., "45K" not "€45K").
+**Income Widget**: Never include currency symbols (€, $) or percentage symbols (%) anywhere in the income widget - not in headers, subtitles, tables, or chart labels. Use plain numbers with K suffix for thousands and +/- signs (e.g., "+45.2K" not "€45.2K", "-1.3K" not "-€1.3K").
 
 ### Key Architectural Patterns
 

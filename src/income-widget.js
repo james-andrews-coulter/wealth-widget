@@ -92,7 +92,8 @@ async function main() {
   var eurRates = await fetchMultipleEURRates(currencies);
 
   // Fetch historical prices for the entire year
-  var startDate = new Date(displayYear, 0, 1);
+  // Start from Dec 1 of PREVIOUS year to ensure we have price data at year start
+  var startDate = new Date(displayYear - 1, 11, 1);
   var endDate = new Date(displayYear, 11, 31);
 
   var allHistoricalPrices = await fetchMultipleHistoricalBatched(symbols, startDate);
@@ -103,12 +104,16 @@ async function main() {
   // Calculate stock attribution
   var stockAttribution = await calculateStockAttribution(displayYear, allHistoricalPrices, eurRates);
 
-  // Calculate total and average
+  // Calculate total from stock attribution (ensures header matches table sum)
   var totalPL = 0;
+  for (var i = 0; i < stockAttribution.length; i++) {
+    totalPL += stockAttribution[i].yearlyPL;
+  }
+
+  // Calculate average per completed month
   var completedMonths = 0;
   for (var i = 0; i < monthlyPL.length; i++) {
     if (monthlyPL[i].hasData) {
-      totalPL += monthlyPL[i].value;
       completedMonths++;
     }
   }

@@ -226,10 +226,11 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   widget.setPadding(16, 8, 16, 8);
   // Tap handling is done via "When Interacting: Run Script" widget setting
 
-  // Header row
+  // Header row - no currency symbols
   var header = widget.addStack();
   header.layoutHorizontally();
-  var totalText = header.addText(formatCurrency(totalPL));
+  var totalStr = (totalPL >= 0 ? "+" : "") + formatNumber(totalPL, false);
+  var totalText = header.addText(totalStr);
   totalText.font = Font.boldSystemFont(18);
   totalText.textColor = totalPL >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
   header.addSpacer();
@@ -239,9 +240,9 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
 
   widget.addSpacer(2);
 
-  // Subtitle: Average/month
-  var subtitleStr = formatCurrency(avgPL) + "/mo";
-  var subtitleText = widget.addText(subtitleStr);
+  // Subtitle: Average/month - no currency symbols
+  var avgStr = (avgPL >= 0 ? "+" : "") + formatNumber(avgPL, false) + "/mo";
+  var subtitleText = widget.addText(avgStr);
   subtitleText.font = Font.systemFont(10);
   subtitleText.textColor = COLORS.textSecondary;
 
@@ -256,7 +257,7 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
 
   widget.addSpacer(8);
 
-  // Stock breakdown header
+  // Stock breakdown header - removed weight column
   var hdrStack = widget.addStack();
   hdrStack.layoutHorizontally();
   var hdr1 = hdrStack.addText("Stock");
@@ -266,14 +267,10 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   var hdr2 = hdrStack.addText("P/L");
   hdr2.font = Font.boldSystemFont(9);
   hdr2.textColor = COLORS.textSecondary;
-  hdrStack.addSpacer(4);
-  var hdr3 = hdrStack.addText("Wt%");
-  hdr3.font = Font.boldSystemFont(9);
-  hdr3.textColor = COLORS.textSecondary;
 
   widget.addSpacer(4);
 
-  // Stock breakdown (up to 11 rows to match wealth widget)
+  // Stock breakdown (up to 11 rows to match wealth widget) - no currency/% symbols
   for (var i = 0; i < Math.min(11, stockAttribution.length); i++) {
     var stock = stockAttribution[i];
     var stockStack = widget.addStack();
@@ -285,22 +282,14 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
     symbolText.font = Font.boldMonospacedSystemFont(9);
     symbolText.textColor = COLORS.text;
 
-    // Spacer to push amount and % to the right
+    // Spacer to push amount to the right
     stockStack.addSpacer();
 
-    // Amount
-    var plStr = (stock.yearlyPL >= 0 ? "+" : "") + formatCurrency(stock.yearlyPL);
+    // Amount - no currency symbol
+    var plStr = (stock.yearlyPL >= 0 ? "+" : "") + formatNumber(stock.yearlyPL, false);
     var amountText = stockStack.addText(plStr);
     amountText.font = Font.regularMonospacedSystemFont(9);
     amountText.textColor = stock.yearlyPL >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
-
-    stockStack.addSpacer(4);
-
-    // Percentage
-    var pctStr = Math.round(stock.percentage) + "%";
-    var pctText = stockStack.addText(pctStr);
-    pctText.font = Font.regularMonospacedSystemFont(9);
-    pctText.textColor = COLORS.textSecondary;
 
     widget.addSpacer(2);
   }
