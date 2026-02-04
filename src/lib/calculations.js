@@ -198,7 +198,9 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
       }
 
       if (closestPrice !== null) {
-        var eurRate = eurRates["USD"] || 1; // Assuming USD for simplicity
+        // Use per-symbol currency for correct conversion
+        var symCurrency = getCurrencyFromSymbol(sym);
+        var eurRate = eurRates[symCurrency] || 1;
         dayValue += holdingsAtDate[sym] * closestPrice * eurRate;
         // Convert cost to EUR using the same rate
         dayCost += costAtDate[sym] * eurRate;
@@ -332,7 +334,9 @@ async function calculateMonthlyPL(year, allHistoricalPrices, eurRates) {
       }
 
       if (closestPrice !== null) {
-        var eurRate = eurRates["USD"] || 1;
+        // Use per-symbol currency for correct conversion
+        var symCurrency = getCurrencyFromSymbol(sym);
+        var eurRate = eurRates[symCurrency] || 1;
         valueAtStart += holdingsAtStart[sym] * closestPrice * eurRate;
         totalCostAtStart += costAtStart[sym] * eurRate;
         hasData = true;
@@ -353,7 +357,9 @@ async function calculateMonthlyPL(year, allHistoricalPrices, eurRates) {
       }
 
       if (closestPrice !== null) {
-        var eurRate = eurRates["USD"] || 1;
+        // Use per-symbol currency for correct conversion
+        var symCurrency = getCurrencyFromSymbol(sym);
+        var eurRate = eurRates[symCurrency] || 1;
         valueAtEnd += holdingsAtEnd[sym] * closestPrice * eurRate;
         totalCostAtEnd += costAtEnd[sym] * eurRate;
         hasData = true;
@@ -434,7 +440,9 @@ async function calculateStockAttribution(year, allHistoricalPrices, eurRates) {
     }
 
     if (priceAtStart !== null && priceAtEnd !== null) {
-      var eurRate = eurRates["USD"] || 1;
+      // Use per-symbol currency for correct conversion
+      var symCurrency = getCurrencyFromSymbol(sym);
+      var eurRate = eurRates[symCurrency] || 1;
 
       var valueAtStart = holdingsAtStart * priceAtStart * eurRate;
       var totalCostAtStart = costAtStart * eurRate;

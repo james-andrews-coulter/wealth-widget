@@ -114,6 +114,10 @@ This dual-path architecture is implemented in `src/lib/config.js` functions: `is
      - 6 months - 2 years: Weekly
      - 2+ years ago: Monthly
 
+### Formatting Rules
+
+**Chart Y-axis labels**: Never include currency symbols (€, $) or percentage symbols (%) on chart axis labels. Use plain numbers with K suffix for thousands (e.g., "45K" not "€45K").
+
 ### Key Architectural Patterns
 
 **Module Communication**: Since ES6 modules are stripped, all functions become global after build. Dependencies are managed through build order, not imports.

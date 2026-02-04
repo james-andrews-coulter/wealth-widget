@@ -1,4 +1,4 @@
-// Wealth Widget - Built 2026-02-04T02:22:38.442Z
+// Wealth Widget - Built 2026-02-04T07:33:49.700Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -180,6 +180,25 @@ function getChangeColor(value) {
   if (value > 0) return COLORS.green;
   if (value < 0) return COLORS.red;
   return COLORS.textSecondary;
+}
+
+// Determine currency from symbol suffix
+// .AS (Amsterdam), .MI (Milan) = EUR
+// .L (London) = GBP
+// -EUR suffix = EUR
+// Default = USD
+function getCurrencyFromSymbol(symbol) {
+  if (!symbol) return "USD";
+  symbol = symbol.toUpperCase();
+
+  if (symbol.endsWith(".AS") || symbol.endsWith(".MI")) return "EUR";
+  if (symbol.endsWith(".L")) return "GBP";
+  if (symbol.includes("-EUR")) return "EUR";
+  if (symbol.includes("-GBP")) return "GBP";
+  if (symbol.includes("-USD")) return "USD";
+
+  // US stocks (no suffix)
+  return "USD";
 }
 
 
@@ -758,7 +777,9 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
       }
 
       if (closestPrice !== null) {
-        var eurRate = eurRates["USD"] || 1; // Assuming USD for simplicity
+        // Use per-symbol currency for correct conversion
+        var symCurrency = getCurrencyFromSymbol(sym);
+        var eurRate = eurRates[symCurrency] || 1;
         dayValue += holdingsAtDate[sym] * closestPrice * eurRate;
         // Convert cost to EUR using the same rate
         dayCost += costAtDate[sym] * eurRate;
@@ -892,7 +913,9 @@ async function calculateMonthlyPL(year, allHistoricalPrices, eurRates) {
       }
 
       if (closestPrice !== null) {
-        var eurRate = eurRates["USD"] || 1;
+        // Use per-symbol currency for correct conversion
+        var symCurrency = getCurrencyFromSymbol(sym);
+        var eurRate = eurRates[symCurrency] || 1;
         valueAtStart += holdingsAtStart[sym] * closestPrice * eurRate;
         totalCostAtStart += costAtStart[sym] * eurRate;
         hasData = true;
@@ -913,7 +936,9 @@ async function calculateMonthlyPL(year, allHistoricalPrices, eurRates) {
       }
 
       if (closestPrice !== null) {
-        var eurRate = eurRates["USD"] || 1;
+        // Use per-symbol currency for correct conversion
+        var symCurrency = getCurrencyFromSymbol(sym);
+        var eurRate = eurRates[symCurrency] || 1;
         valueAtEnd += holdingsAtEnd[sym] * closestPrice * eurRate;
         totalCostAtEnd += costAtEnd[sym] * eurRate;
         hasData = true;
@@ -994,7 +1019,9 @@ async function calculateStockAttribution(year, allHistoricalPrices, eurRates) {
     }
 
     if (priceAtStart !== null && priceAtEnd !== null) {
-      var eurRate = eurRates["USD"] || 1;
+      // Use per-symbol currency for correct conversion
+      var symCurrency = getCurrencyFromSymbol(sym);
+      var eurRate = eurRates[symCurrency] || 1;
 
       var valueAtStart = holdingsAtStart * priceAtStart * eurRate;
       var totalCostAtStart = costAtStart * eurRate;
@@ -1551,8 +1578,9 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
     widget.addSpacer(2);
   }
 
-  // Add tap URL to trigger refresh with next year
-  widget.url = "scriptable:///run/Income%20Widget?action=nextYear";
+  // Do NOT set widget.url - it causes Scriptable to open on tap
+  // Instead, configure the widget's "When Interacting" setting to "Run Script"
+  // in iOS widget configuration. This runs the script silently in background.
 
   return widget;
 }

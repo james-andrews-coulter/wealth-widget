@@ -95,4 +95,23 @@ function getChangeColor(value) {
   return COLORS.textSecondary;
 }
 
-export { COLORS, formatNumber, formatPercent, formatCurrency, padLeft, padRight, getChangeColor };
+// Determine currency from symbol suffix
+// .AS (Amsterdam), .MI (Milan) = EUR
+// .L (London) = GBP
+// -EUR suffix = EUR
+// Default = USD
+function getCurrencyFromSymbol(symbol) {
+  if (!symbol) return "USD";
+  symbol = symbol.toUpperCase();
+
+  if (symbol.endsWith(".AS") || symbol.endsWith(".MI")) return "EUR";
+  if (symbol.endsWith(".L")) return "GBP";
+  if (symbol.includes("-EUR")) return "EUR";
+  if (symbol.includes("-GBP")) return "GBP";
+  if (symbol.includes("-USD")) return "USD";
+
+  // US stocks (no suffix)
+  return "USD";
+}
+
+export { COLORS, formatNumber, formatPercent, formatCurrency, padLeft, padRight, getChangeColor, getCurrencyFromSymbol };

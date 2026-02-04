@@ -305,8 +305,9 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
     widget.addSpacer(2);
   }
 
-  // Add tap URL to trigger refresh with next year
-  widget.url = "scriptable:///run/Income%20Widget?action=nextYear";
+  // Do NOT set widget.url - it causes Scriptable to open on tap
+  // Instead, configure the widget's "When Interacting" setting to "Run Script"
+  // in iOS widget configuration. This runs the script silently in background.
 
   return widget;
 }
