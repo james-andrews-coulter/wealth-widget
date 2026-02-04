@@ -1,4 +1,4 @@
-// Wealth Widget - Built 2026-02-04T01:34:08.516Z
+// Wealth Widget - Built 2026-02-04T01:37:19.879Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -98,7 +98,9 @@ async function ensureDataDirectory() {
 // Color scheme with dynamic light/dark mode support
 const COLORS = {
   bg: Color.dynamic(new Color("#FFFFFF"), new Color("#1C1C1E")),
+  background: Color.dynamic(new Color("#FFFFFF"), new Color("#1C1C1E")),
   text: Color.dynamic(Color.black(), Color.white()),
+  textPrimary: Color.dynamic(Color.black(), Color.white()),
   textSecondary: Color.dynamic(new Color("#6B7280"), Color.gray()),
   green: new Color("#34C759"),
   red: new Color("#FF3B30"),
@@ -1476,16 +1478,16 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   subtitleText.font = Font.systemFont(14);
   subtitleText.textColor = COLORS.textSecondary;
 
-  widget.addSpacer(16);
+  widget.addSpacer(8);
 
   // Bar chart
-  var chartHeight = 180;
+  var chartHeight = 120;
   var chartWidth = 340;
   var chartImage = await drawBarChartImage(monthlyPL, chartWidth, chartHeight);
   var chartImgWidget = widget.addImage(chartImage);
   chartImgWidget.imageSize = new Size(chartWidth, chartHeight);
 
-  widget.addSpacer(16);
+  widget.addSpacer(8);
 
   // Divider line
   var dividerStack = widget.addStack();
@@ -1496,10 +1498,10 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   divider.textColor = COLORS.axisLine;
   dividerStack.addSpacer();
 
-  widget.addSpacer(12);
+  widget.addSpacer(8);
 
-  // Stock breakdown (10 rows)
-  for (var i = 0; i < Math.min(10, stockAttribution.length); i++) {
+  // Stock breakdown (6 rows)
+  for (var i = 0; i < Math.min(6, stockAttribution.length); i++) {
     var stock = stockAttribution[i];
     var stockStack = widget.addStack();
     stockStack.layoutHorizontally();
@@ -1532,7 +1534,7 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
     pctText.textColor = COLORS.textSecondary;
     pctText.rightAlignText();
 
-    if (i < 9) widget.addSpacer(6);
+    if (i < 5) widget.addSpacer(4);
   }
 
   // Add tap URL to trigger refresh with next year

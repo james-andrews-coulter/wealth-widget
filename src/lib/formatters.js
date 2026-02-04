@@ -4,7 +4,9 @@
 // Color scheme with dynamic light/dark mode support
 const COLORS = {
   bg: Color.dynamic(new Color("#FFFFFF"), new Color("#1C1C1E")),
+  background: Color.dynamic(new Color("#FFFFFF"), new Color("#1C1C1E")),
   text: Color.dynamic(Color.black(), Color.white()),
+  textPrimary: Color.dynamic(Color.black(), Color.white()),
   textSecondary: Color.dynamic(new Color("#6B7280"), Color.gray()),
   green: new Color("#34C759"),
   red: new Color("#FF3B30"),

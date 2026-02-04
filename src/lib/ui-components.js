@@ -238,16 +238,16 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   subtitleText.font = Font.systemFont(14);
   subtitleText.textColor = COLORS.textSecondary;
 
-  widget.addSpacer(16);
+  widget.addSpacer(8);
 
   // Bar chart
-  var chartHeight = 180;
+  var chartHeight = 120;
   var chartWidth = 340;
   var chartImage = await drawBarChartImage(monthlyPL, chartWidth, chartHeight);
   var chartImgWidget = widget.addImage(chartImage);
   chartImgWidget.imageSize = new Size(chartWidth, chartHeight);
 
-  widget.addSpacer(16);
+  widget.addSpacer(8);
 
   // Divider line
   var dividerStack = widget.addStack();
@@ -258,10 +258,10 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   divider.textColor = COLORS.axisLine;
   dividerStack.addSpacer();
 
-  widget.addSpacer(12);
+  widget.addSpacer(8);
 
-  // Stock breakdown (10 rows)
-  for (var i = 0; i < Math.min(10, stockAttribution.length); i++) {
+  // Stock breakdown (6 rows)
+  for (var i = 0; i < Math.min(6, stockAttribution.length); i++) {
     var stock = stockAttribution[i];
     var stockStack = widget.addStack();
     stockStack.layoutHorizontally();
@@ -294,7 +294,7 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
     pctText.textColor = COLORS.textSecondary;
     pctText.rightAlignText();
 
-    if (i < 9) widget.addSpacer(6);
+    if (i < 5) widget.addSpacer(4);
   }
 
   // Add tap URL to trigger refresh with next year
