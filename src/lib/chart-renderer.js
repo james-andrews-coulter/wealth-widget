@@ -113,19 +113,17 @@ function drawBarChart(context, monthlyData, x, y, width, height, leftMargin, bot
   var graphWidth = width - leftMargin;
   var graphHeight = height - bottomMargin;
 
-  // Find min and max values (include 0 in range)
+  // Find min and max values (all bars extend upward from 0)
   var values = monthlyData.map(function(d) { return d.value; });
   var maxVal = Math.max.apply(null, values);
   var minVal = Math.min.apply(null, values);
 
-  // Ensure 0 is in the range
-  maxVal = Math.max(maxVal, 0);
-  minVal = Math.min(minVal, 0);
+  // Always use 0 as minimum (all bars extend upward)
+  var minVal = 0;
 
-  // Add some padding to the range
+  // Add some padding to the max
   var range = maxVal - minVal || 1;
   maxVal = maxVal + range * 0.1;
-  minVal = minVal - range * 0.1;
   range = maxVal - minVal;
 
   // Calculate gridline interval (round to nice numbers)
@@ -157,19 +155,7 @@ function drawBarChart(context, monthlyData, x, y, width, height, leftMargin, bot
     gridValue += gridInterval;
   }
 
-  // Draw baseline (zero line) thicker
-  if (minVal < 0 && maxVal > 0) {
-    var zeroY = y + graphHeight - ((0 - minVal) / range) * graphHeight;
-    context.setStrokeColor(COLORS.textSecondary);
-    context.setLineWidth(1);
-    var zeroPath = new Path();
-    zeroPath.move(new Point(graphX, zeroY));
-    zeroPath.addLine(new Point(graphX + graphWidth, zeroY));
-    context.addPath(zeroPath);
-    context.strokePath();
-  }
-
-  // Draw bars
+  // Draw bars (all extend upward from bottom, colored by sign)
   var barWidth = graphWidth / 12;
   var barSpacing = barWidth * 0.2;
   var actualBarWidth = barWidth - barSpacing;
@@ -180,10 +166,10 @@ function drawBarChart(context, monthlyData, x, y, width, height, leftMargin, bot
 
     if (value === 0 || !monthlyData[i].hasData) continue;
 
-    // All bars extend upward from baseline
-    var baseline = y + graphHeight - ((0 - minVal) / range) * graphHeight;
-    var barHeight = Math.abs((value / range) * graphHeight);
-    var barY = baseline - barHeight;
+    // All bars extend upward from bottom (0 baseline)
+    var absValue = Math.abs(value);
+    var barHeight = (absValue / range) * graphHeight;
+    var barY = y + graphHeight - barHeight;
 
     // Color based on positive/negative
     var barColor = value >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;

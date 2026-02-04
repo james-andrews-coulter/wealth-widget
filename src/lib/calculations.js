@@ -257,19 +257,23 @@ async function calculateMonthlyPL(year, allHistoricalPrices, eurRates) {
 
   var monthlyPL = [];
 
+  // Get current date info for future month check
+  var now = new Date();
+  var currentYear = now.getFullYear();
+  var currentMonth = now.getMonth() + 1; // getMonth() returns 0-11
+
   // Process each month (1-12)
   for (var month = 1; month <= 12; month++) {
+    // Check if this month is in the future
+    if (year > currentYear || (year === currentYear && month > currentMonth)) {
+      monthlyPL.push({ month: month, value: 0, hasData: false });
+      continue;
+    }
+
     var monthStart = new Date(year, month - 1, 1);
     var monthEnd = new Date(year, month, 0); // Last day of month
     var monthStartStr = monthStart.toISOString().split("T")[0];
     var monthEndStr = monthEnd.toISOString().split("T")[0];
-
-    // Check if this month is in the future
-    var today = new Date();
-    if (monthStart > today) {
-      monthlyPL.push({ month: month, value: 0, hasData: false });
-      continue;
-    }
 
     // Calculate holdings and cost at month boundaries
     var holdingsAtStart = {};

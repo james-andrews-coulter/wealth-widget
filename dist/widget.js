@@ -1,4 +1,4 @@
-// Wealth Widget - Built 2026-02-04T01:39:49.154Z
+// Wealth Widget - Built 2026-02-04T01:46:34.075Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -824,19 +824,23 @@ async function calculateMonthlyPL(year, allHistoricalPrices, eurRates) {
 
   var monthlyPL = [];
 
+  // Get current date info for future month check
+  var now = new Date();
+  var currentYear = now.getFullYear();
+  var currentMonth = now.getMonth() + 1; // getMonth() returns 0-11
+
   // Process each month (1-12)
   for (var month = 1; month <= 12; month++) {
+    // Check if this month is in the future
+    if (year > currentYear || (year === currentYear && month > currentMonth)) {
+      monthlyPL.push({ month: month, value: 0, hasData: false });
+      continue;
+    }
+
     var monthStart = new Date(year, month - 1, 1);
     var monthEnd = new Date(year, month, 0); // Last day of month
     var monthStartStr = monthStart.toISOString().split("T")[0];
     var monthEndStr = monthEnd.toISOString().split("T")[0];
-
-    // Check if this month is in the future
-    var today = new Date();
-    if (monthStart > today) {
-      monthlyPL.push({ month: month, value: 0, hasData: false });
-      continue;
-    }
 
     // Calculate holdings and cost at month boundaries
     var holdingsAtStart = {};
@@ -1142,19 +1146,17 @@ function drawBarChart(context, monthlyData, x, y, width, height, leftMargin, bot
   var graphWidth = width - leftMargin;
   var graphHeight = height - bottomMargin;
 
-  // Find min and max values (include 0 in range)
+  // Find min and max values (all bars extend upward from 0)
   var values = monthlyData.map(function(d) { return d.value; });
   var maxVal = Math.max.apply(null, values);
   var minVal = Math.min.apply(null, values);
 
-  // Ensure 0 is in the range
-  maxVal = Math.max(maxVal, 0);
-  minVal = Math.min(minVal, 0);
+  // Always use 0 as minimum (all bars extend upward)
+  var minVal = 0;
 
-  // Add some padding to the range
+  // Add some padding to the max
   var range = maxVal - minVal || 1;
   maxVal = maxVal + range * 0.1;
-  minVal = minVal - range * 0.1;
   range = maxVal - minVal;
 
   // Calculate gridline interval (round to nice numbers)
@@ -1186,19 +1188,7 @@ function drawBarChart(context, monthlyData, x, y, width, height, leftMargin, bot
     gridValue += gridInterval;
   }
 
-  // Draw baseline (zero line) thicker
-  if (minVal < 0 && maxVal > 0) {
-    var zeroY = y + graphHeight - ((0 - minVal) / range) * graphHeight;
-    context.setStrokeColor(COLORS.textSecondary);
-    context.setLineWidth(1);
-    var zeroPath = new Path();
-    zeroPath.move(new Point(graphX, zeroY));
-    zeroPath.addLine(new Point(graphX + graphWidth, zeroY));
-    context.addPath(zeroPath);
-    context.strokePath();
-  }
-
-  // Draw bars
+  // Draw bars (all extend upward from bottom, colored by sign)
   var barWidth = graphWidth / 12;
   var barSpacing = barWidth * 0.2;
   var actualBarWidth = barWidth - barSpacing;
@@ -1209,10 +1199,10 @@ function drawBarChart(context, monthlyData, x, y, width, height, leftMargin, bot
 
     if (value === 0 || !monthlyData[i].hasData) continue;
 
-    // All bars extend upward from baseline
-    var baseline = y + graphHeight - ((0 - minVal) / range) * graphHeight;
-    var barHeight = Math.abs((value / range) * graphHeight);
-    var barY = baseline - barHeight;
+    // All bars extend upward from bottom (0 baseline)
+    var absValue = Math.abs(value);
+    var barHeight = (absValue / range) * graphHeight;
+    var barY = y + graphHeight - barHeight;
 
     // Color based on positive/negative
     var barColor = value >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
@@ -1464,6 +1454,9 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   var widget = new ListWidget();
   widget.backgroundColor = COLORS.background;
   widget.setPadding(16, 8, 16, 8);
+
+  // Enable tap to cycle through years
+  widget.url = URLScheme.forRunningScript() + "&action=nextYear";
 
   // Header row
   var header = widget.addStack();
