@@ -1,4 +1,4 @@
-// Income Widget - Built 2026-02-04T02:18:21.716Z
+// Income Widget - Built 2026-02-04T02:21:27.414Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -1606,12 +1606,20 @@ async function handleYearCycle(availableYears) {
 
 // Main function
 async function main() {
+  // Debug: Show what paths we're using
+  console.log("isDevelopment: " + isDevelopment());
+  console.log("Data path: " + getDataPath());
+  console.log("Transactions path: " + getTransactionsPath());
+
   // Ensure data directory exists
   await ensureDataDirectory();
 
   // Read state and get available years
   var state = await readIncomeWidgetState();
   var transactions = await readTransactions();
+
+  console.log("Transactions count: " + transactions.length);
+
   var availableYears = getYearsFromTransactions(transactions);
 
   // Always include current year

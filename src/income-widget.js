@@ -25,12 +25,20 @@ async function handleYearCycle(availableYears) {
 
 // Main function
 async function main() {
+  // Debug: Show what paths we're using
+  console.log("isDevelopment: " + isDevelopment());
+  console.log("Data path: " + getDataPath());
+  console.log("Transactions path: " + getTransactionsPath());
+
   // Ensure data directory exists
   await ensureDataDirectory();
 
   // Read state and get available years
   var state = await readIncomeWidgetState();
   var transactions = await readTransactions();
+
+  console.log("Transactions count: " + transactions.length);
+
   var availableYears = getYearsFromTransactions(transactions);
 
   // Always include current year
