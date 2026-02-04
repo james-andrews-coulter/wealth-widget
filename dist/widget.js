@@ -1,4 +1,4 @@
-// Wealth Widget - Built 2026-02-04T01:31:45.827Z
+// Wealth Widget - Built 2026-02-04T01:34:08.516Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -141,6 +141,28 @@ function formatPercent(value, showSign) {
   if (value < 0) sign = "-";
 
   return sign + Math.abs(value).toFixed(1) + "%";
+}
+
+// Format currency with EUR symbol
+function formatCurrency(value) {
+  if (value === null || value === undefined) return "N/A";
+
+  var absValue = Math.abs(value);
+  var sign = value < 0 ? "-" : "";
+
+  var formatted;
+  if (absValue >= 1000) {
+    var k = absValue / 1000;
+    if (k >= 100) {
+      formatted = Math.round(k).toLocaleString("en-US") + "K";
+    } else {
+      formatted = k.toFixed(1).replace(/\.0$/, "") + "K";
+    }
+  } else {
+    formatted = Math.round(absValue).toLocaleString("en-US");
+  }
+
+  return sign + "€" + formatted;
 }
 
 // Pad string to left with spaces
