@@ -1,4 +1,4 @@
-// Income Widget - Built 2026-02-04T07:57:39.746Z
+// Income Widget - Built 2026-02-04T08:09:25.647Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -605,7 +605,9 @@ function calculatePortfolio(holdings, prices, eurRates) {
     const previousCloseEUR = priceData.previousClose * eurRate;
     const valueEUR = holding.quantity * priceEUR;
     const dayChangeEUR = holding.quantity * (priceEUR - previousCloseEUR);
-    const costEUR = holding.purchasePrice ? holding.quantity * holding.purchasePrice : null;
+    // Cost must also be converted to EUR using the same rate as value
+    // (purchasePrice is in native currency from transactions)
+    const costEUR = holding.purchasePrice ? holding.quantity * holding.purchasePrice * eurRate : null;
     const profitLossEUR = costEUR ? valueEUR - costEUR : null;
     const profitLossPct = costEUR ? ((valueEUR - costEUR) / costEUR) * 100 : null;
 
