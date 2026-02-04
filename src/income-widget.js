@@ -42,6 +42,9 @@ async function main() {
   // Sort years in descending order (newest first)
   availableYears.sort(function(a, b) { return b - a; });
 
+  console.log("Available years: " + JSON.stringify(availableYears));
+  console.log("Initial state.yearOffset: " + state.yearOffset);
+
   if (availableYears.length === 0) {
     // No transaction data
     var errorWidget = new ListWidget();
@@ -61,6 +64,7 @@ async function main() {
   if (isInteraction) {
     await handleYearCycle(availableYears);
     state = await readIncomeWidgetState(); // Re-read updated state
+    console.log("After cycle state.yearOffset: " + state.yearOffset);
   }
 
   // Calculate which year to display
@@ -106,14 +110,13 @@ async function main() {
   // Render widget
   var widget = await createIncomeLargeWidget(displayYear, monthlyPL, stockAttribution, totalPL, avgPL);
 
-  // Always set the widget (for home screen updates)
+  // Set the widget for home screen
   Script.setWidget(widget);
 
-  if (isInteraction) {
-    // Tapped or run manually - show preview of new year
-    console.log("Cycled to year: " + displayYear);
-    await widget.presentLarge();
-  }
+  console.log("Displaying year: " + displayYear);
+
+  // DO NOT call widget.presentLarge() - that opens Scriptable
+  // The widget will update silently on the home screen
 
   Script.complete();
 }
