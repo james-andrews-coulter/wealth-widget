@@ -5,6 +5,8 @@
   "main": "src/widget.js",
   "scripts": {
     "build": "node build.js",
+    "build:wealth": "node build.js",
+    "build:income": "node build.js",
     "watch": "nodemon --watch src -e js --exec npm run build"
   },
   "keywords": ["scriptable", "widget", "portfolio", "stocks"],
