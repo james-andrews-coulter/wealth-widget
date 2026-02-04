@@ -25,18 +25,6 @@ async function handleYearCycle(availableYears) {
 
 // Main function
 async function main() {
-  // Debug: Log args to see what we receive
-  console.log("=== DEBUG START ===");
-  console.log("args exists: " + (typeof args !== "undefined"));
-  if (typeof args !== "undefined") {
-    console.log("args.queryParameters: " + JSON.stringify(args.queryParameters));
-    console.log("args.widgetParameter: " + args.widgetParameter);
-    console.log("args.shortcutParameter: " + args.shortcutParameter);
-  }
-  console.log("config.runsInWidget: " + config.runsInWidget);
-  console.log("URLScheme.forRunningScript(): " + URLScheme.forRunningScript());
-  console.log("=== DEBUG END ===");
-
   // Ensure data directory exists
   await ensureDataDirectory();
 
@@ -66,13 +54,9 @@ async function main() {
     return;
   }
 
-  // Check if this is a tap interaction
-  var isInteraction = false;
-  if (typeof args !== "undefined" && args.queryParameters) {
-    isInteraction = args.queryParameters.action === "nextYear";
-  }
-
-  console.log("isInteraction: " + isInteraction);
+  // If running interactively (tapped or run manually), cycle to next year
+  // config.runsInWidget is true only during background widget refresh
+  var isInteraction = !config.runsInWidget;
 
   if (isInteraction) {
     await handleYearCycle(availableYears);
@@ -122,15 +106,12 @@ async function main() {
   // Render widget
   var widget = await createIncomeLargeWidget(displayYear, monthlyPL, stockAttribution, totalPL, avgPL);
 
-  if (config.runsInWidget || isInteraction) {
-    // Running as a widget or handling tap - just update widget
-    Script.setWidget(widget);
-  } else {
-    // Development mode: show console output and preview
-    console.log("Income Widget - Year: " + displayYear);
-    console.log("Total P/L: " + formatCurrency(totalPL));
-    console.log("Average P/L: " + formatCurrency(avgPL));
-    console.log("Completed months: " + completedMonths);
+  // Always set the widget (for home screen updates)
+  Script.setWidget(widget);
+
+  if (isInteraction) {
+    // Tapped or run manually - show preview of new year
+    console.log("Cycled to year: " + displayYear);
     await widget.presentLarge();
   }
 

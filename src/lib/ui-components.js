@@ -224,11 +224,7 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   var widget = new ListWidget();
   widget.backgroundColor = COLORS.background;
   widget.setPadding(16, 8, 16, 8);
-
-  // Enable tap to cycle through years
-  var baseUrl = URLScheme.forRunningScript();
-  var separator = baseUrl.indexOf("?") > -1 ? "&" : "?";
-  widget.url = baseUrl + separator + "action=nextYear";
+  // Tap handling is done via "When Interacting: Run Script" widget setting
 
   // Header row
   var header = widget.addStack();

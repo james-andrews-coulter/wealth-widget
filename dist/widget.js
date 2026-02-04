@@ -1,4 +1,4 @@
-// Wealth Widget - Built 2026-02-04T02:12:09.524Z
+// Wealth Widget - Built 2026-02-04T02:14:02.068Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -1477,11 +1477,7 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   var widget = new ListWidget();
   widget.backgroundColor = COLORS.background;
   widget.setPadding(16, 8, 16, 8);
-
-  // Enable tap to cycle through years
-  var baseUrl = URLScheme.forRunningScript();
-  var separator = baseUrl.indexOf("?") > -1 ? "&" : "?";
-  widget.url = baseUrl + separator + "action=nextYear";
+  // Tap handling is done via "When Interacting: Run Script" widget setting
 
   // Header row
   var header = widget.addStack();
