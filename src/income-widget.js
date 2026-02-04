@@ -25,6 +25,18 @@ async function handleYearCycle(availableYears) {
 
 // Main function
 async function main() {
+  // Debug: Log args to see what we receive
+  console.log("=== DEBUG START ===");
+  console.log("args exists: " + (typeof args !== "undefined"));
+  if (typeof args !== "undefined") {
+    console.log("args.queryParameters: " + JSON.stringify(args.queryParameters));
+    console.log("args.widgetParameter: " + args.widgetParameter);
+    console.log("args.shortcutParameter: " + args.shortcutParameter);
+  }
+  console.log("config.runsInWidget: " + config.runsInWidget);
+  console.log("URLScheme.forRunningScript(): " + URLScheme.forRunningScript());
+  console.log("=== DEBUG END ===");
+
   // Ensure data directory exists
   await ensureDataDirectory();
 
@@ -59,6 +71,8 @@ async function main() {
   if (typeof args !== "undefined" && args.queryParameters) {
     isInteraction = args.queryParameters.action === "nextYear";
   }
+
+  console.log("isInteraction: " + isInteraction);
 
   if (isInteraction) {
     await handleYearCycle(availableYears);
