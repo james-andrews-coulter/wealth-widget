@@ -219,4 +219,100 @@ async function showInteractiveMenu(portfolio) {
   }
 }
 
-export { createLargeWidget, showInteractiveMenu };
+// Create large income widget layout
+async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalPL, avgPL) {
+  var widget = new ListWidget();
+  widget.backgroundColor = COLORS.background;
+  widget.setPadding(16, 16, 16, 16);
+
+  // Header: Total P/L
+  var headerText = widget.addText(formatCurrency(totalPL));
+  headerText.font = Font.boldSystemFont(32);
+  headerText.textColor = totalPL >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
+
+  widget.addSpacer(4);
+
+  // Subtitle: Average · Year
+  var subtitleStr = formatCurrency(avgPL) + "/mo · " + year;
+  var subtitleText = widget.addText(subtitleStr);
+  subtitleText.font = Font.systemFont(14);
+  subtitleText.textColor = COLORS.textSecondary;
+
+  widget.addSpacer(16);
+
+  // Bar chart
+  var chartHeight = 180;
+  var chartWidth = 340;
+  var chartImage = await drawBarChartImage(monthlyPL, chartWidth, chartHeight);
+  var chartImgWidget = widget.addImage(chartImage);
+  chartImgWidget.imageSize = new Size(chartWidth, chartHeight);
+
+  widget.addSpacer(16);
+
+  // Divider line
+  var dividerStack = widget.addStack();
+  dividerStack.layoutHorizontally();
+  dividerStack.addSpacer();
+  var divider = dividerStack.addText("─".repeat(40));
+  divider.font = Font.systemFont(8);
+  divider.textColor = COLORS.axisLine;
+  dividerStack.addSpacer();
+
+  widget.addSpacer(12);
+
+  // Stock breakdown (10 rows)
+  for (var i = 0; i < Math.min(10, stockAttribution.length); i++) {
+    var stock = stockAttribution[i];
+    var stockStack = widget.addStack();
+    stockStack.layoutHorizontally();
+    stockStack.centerAlignContent();
+
+    // Symbol (left-aligned, 80px width)
+    var symbolText = stockStack.addText(stock.symbol);
+    symbolText.font = Font.systemFont(12);
+    symbolText.textColor = COLORS.textPrimary;
+    symbolText.minimumScaleFactor = 0.8;
+    symbolText.lineLimit = 1;
+    stockStack.addSpacer(8);
+
+    // Spacer to push amount and % to the right
+    stockStack.addSpacer();
+
+    // Amount (right-aligned)
+    var plStr = (stock.yearlyPL >= 0 ? "+" : "") + formatCurrency(stock.yearlyPL);
+    var amountText = stockStack.addText(plStr);
+    amountText.font = Font.systemFont(12);
+    amountText.textColor = stock.yearlyPL >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
+    amountText.rightAlignText();
+
+    stockStack.addSpacer(12);
+
+    // Percentage
+    var pctStr = Math.round(stock.percentage) + "%";
+    var pctText = stockStack.addText(pctStr);
+    pctText.font = Font.systemFont(11);
+    pctText.textColor = COLORS.textSecondary;
+    pctText.rightAlignText();
+
+    if (i < 9) widget.addSpacer(6);
+  }
+
+  // Add tap URL to trigger refresh with next year
+  widget.url = "scriptable:///run/Income%20Widget?action=nextYear";
+
+  return widget;
+}
+
+// Helper: Draw bar chart to image
+async function drawBarChartImage(monthlyPL, width, height) {
+  var canvas = new DrawContext();
+  canvas.size = new Size(width, height);
+  canvas.opaque = false;
+  canvas.respectScreenScale = true;
+
+  drawBarChart(canvas, monthlyPL, 0, 0, width, height, 40, 20);
+
+  return canvas.getImage();
+}
+
+export { createLargeWidget, showInteractiveMenu, createIncomeLargeWidget };
