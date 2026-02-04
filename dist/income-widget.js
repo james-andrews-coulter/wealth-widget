@@ -1,4 +1,4 @@
-// Income Widget - Built 2026-02-04T02:02:04.605Z
+// Income Widget - Built 2026-02-04T02:08:38.039Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -1591,14 +1591,17 @@ async function drawBarChartImage(monthlyPL, width, height) {
 // Run: npm run build
 // Then copy dist/income-widget.js to Scriptable
 
-// Handle tap interaction for year cycling
-async function handleYearCycle() {
+// Handle tap interaction for year cycling (backwards through time)
+async function handleYearCycle(availableYears) {
   var state = await readIncomeWidgetState();
-  var transactions = await readTransactions();
-  var availableYears = getYearsFromTransactions(transactions);
 
-  // Increment year offset (wrap around)
-  state.yearOffset = (state.yearOffset + 1) % availableYears.length;
+  // Increment offset to go back in time
+  state.yearOffset = state.yearOffset + 1;
+
+  // Wrap around when we reach the oldest year
+  if (state.yearOffset >= availableYears.length) {
+    state.yearOffset = 0; // Return to current year
+  }
 
   await writeIncomeWidgetState(state);
 
@@ -1607,21 +1610,10 @@ async function handleYearCycle() {
 
 // Main function
 async function main() {
-  // Check if this is a tap interaction
-  var isInteraction = false;
-  if (typeof args !== "undefined" && args.queryParameters) {
-    isInteraction = args.queryParameters.action === "nextYear";
-  }
-
-  if (isInteraction) {
-    await handleYearCycle();
-    // After cycling, refresh widget to show new year
-  }
-
   // Ensure data directory exists
   await ensureDataDirectory();
 
-  // Read state to determine which year to display
+  // Read state and get available years
   var state = await readIncomeWidgetState();
   var transactions = await readTransactions();
   var availableYears = getYearsFromTransactions(transactions);
@@ -1630,8 +1622,10 @@ async function main() {
   var currentYear = new Date().getFullYear();
   if (availableYears.indexOf(currentYear) === -1) {
     availableYears.push(currentYear);
-    availableYears.sort();
   }
+
+  // Sort years in descending order (newest first)
+  availableYears.sort(function(a, b) { return b - a; });
 
   if (availableYears.length === 0) {
     // No transaction data
@@ -1645,9 +1639,21 @@ async function main() {
     return;
   }
 
-  // Calculate which year to display (default to current year, offset=0)
+  // Check if this is a tap interaction
+  var isInteraction = false;
+  if (typeof args !== "undefined" && args.queryParameters) {
+    isInteraction = args.queryParameters.action === "nextYear";
+  }
+
+  if (isInteraction) {
+    await handleYearCycle(availableYears);
+    state = await readIncomeWidgetState(); // Re-read updated state
+  }
+
+  // Calculate which year to display
+  // offset=0 shows current year, offset=1 shows last year, etc.
   var yearIndex = state.yearOffset % availableYears.length;
-  var displayYear = availableYears[availableYears.length - 1 - yearIndex];
+  var displayYear = availableYears[yearIndex];
 
   // Get unique symbols
   var holdings = await readHoldings();
@@ -1685,17 +1691,17 @@ async function main() {
   var avgPL = completedMonths > 0 ? totalPL / completedMonths : 0;
 
   // Render widget
-  if (config.runsInWidget) {
-    var widget = await createIncomeLargeWidget(displayYear, monthlyPL, stockAttribution, totalPL, avgPL);
+  var widget = await createIncomeLargeWidget(displayYear, monthlyPL, stockAttribution, totalPL, avgPL);
+
+  if (config.runsInWidget || isInteraction) {
+    // Running as a widget or handling tap - just update widget
     Script.setWidget(widget);
   } else {
-    // Development mode: show year and total
+    // Development mode: show console output and preview
     console.log("Income Widget - Year: " + displayYear);
     console.log("Total P/L: " + formatCurrency(totalPL));
     console.log("Average P/L: " + formatCurrency(avgPL));
     console.log("Completed months: " + completedMonths);
-
-    var widget = await createIncomeLargeWidget(displayYear, monthlyPL, stockAttribution, totalPL, avgPL);
     await widget.presentLarge();
   }
 
