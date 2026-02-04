@@ -1,4 +1,4 @@
-// Wealth Widget - Built 2026-01-24T15:14:31.452Z
+// Wealth Widget - Built 2026-02-04T01:16:09.640Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -364,6 +364,40 @@ function getPriceOnDate(priceMap, ticker, targetDate) {
   }
 
   return closestPrice;
+}
+
+// Read income widget state (year offset)
+async function readIncomeWidgetState() {
+  try {
+    const fm = getFileManager();
+    const dataPath = getDataPath();
+    const statePath = fm.joinPath(dataPath, "income-widget-state.json");
+
+    if (!fm.fileExists(statePath)) {
+      return { yearOffset: 0 };
+    }
+
+    const content = fm.readString(statePath);
+    const state = JSON.parse(content);
+    return state;
+  } catch (error) {
+    console.error("Error reading income widget state:", error);
+    return { yearOffset: 0 };
+  }
+}
+
+// Write income widget state (year offset)
+async function writeIncomeWidgetState(state) {
+  try {
+    const fm = getFileManager();
+    const dataPath = getDataPath();
+    const statePath = fm.joinPath(dataPath, "income-widget-state.json");
+
+    const content = JSON.stringify(state, null, 2);
+    fm.writeString(statePath, content);
+  } catch (error) {
+    console.error("Error writing income widget state:", error);
+  }
 }
 
 
@@ -746,11 +780,239 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
   return portfolioValues;
 }
 
+// Get list of years that have transaction data
+function getYearsFromTransactions(transactions) {
+  var years = {};
+  for (var i = 0; i < transactions.length; i++) {
+    var year = parseInt(transactions[i].date.substring(0, 4));
+    years[year] = true;
+  }
+  var yearList = Object.keys(years).map(function(y) { return parseInt(y); });
+  yearList.sort(function(a, b) { return a - b; });
+  return yearList;
+}
+
+// Calculate monthly P/L for a given year
+async function calculateMonthlyPL(year, allHistoricalPrices, eurRates) {
+  var transactions = await readTransactions();
+  if (transactions.length === 0) return [];
+
+  var monthlyPL = [];
+
+  // Process each month (1-12)
+  for (var month = 1; month <= 12; month++) {
+    var monthStart = new Date(year, month - 1, 1);
+    var monthEnd = new Date(year, month, 0); // Last day of month
+    var monthStartStr = monthStart.toISOString().split("T")[0];
+    var monthEndStr = monthEnd.toISOString().split("T")[0];
+
+    // Check if this month is in the future
+    var today = new Date();
+    if (monthStart > today) {
+      monthlyPL.push({ month: month, value: 0, hasData: false });
+      continue;
+    }
+
+    // Calculate holdings and cost at month boundaries
+    var holdingsAtStart = {};
+    var costAtStart = {};
+    var holdingsAtEnd = {};
+    var costAtEnd = {};
+
+    for (var t = 0; t < transactions.length; t++) {
+      var txDate = transactions[t].date;
+      var sym = transactions[t].symbol;
+
+      if (txDate <= monthStartStr) {
+        if (!holdingsAtStart[sym]) {
+          holdingsAtStart[sym] = 0;
+          costAtStart[sym] = 0;
+        }
+        holdingsAtStart[sym] += transactions[t].quantity;
+        costAtStart[sym] += transactions[t].quantity * transactions[t].price;
+      }
+
+      if (txDate <= monthEndStr) {
+        if (!holdingsAtEnd[sym]) {
+          holdingsAtEnd[sym] = 0;
+          costAtEnd[sym] = 0;
+        }
+        holdingsAtEnd[sym] += transactions[t].quantity;
+        costAtEnd[sym] += transactions[t].quantity * transactions[t].price;
+      }
+    }
+
+    // Calculate portfolio values at boundaries
+    var valueAtStart = 0;
+    var totalCostAtStart = 0;
+    var valueAtEnd = 0;
+    var totalCostAtEnd = 0;
+    var hasData = false;
+
+    // Start of month
+    for (var sym in holdingsAtStart) {
+      if (holdingsAtStart[sym] <= 0) continue;
+
+      var histData = allHistoricalPrices[sym];
+      if (!histData || histData.length === 0) continue;
+
+      var closestPrice = null;
+      for (var k = 0; k < histData.length; k++) {
+        var histDate = new Date(histData[k].date);
+        if (histDate <= monthStart) closestPrice = histData[k].price;
+      }
+
+      if (closestPrice !== null) {
+        var eurRate = eurRates["USD"] || 1;
+        valueAtStart += holdingsAtStart[sym] * closestPrice * eurRate;
+        totalCostAtStart += costAtStart[sym] * eurRate;
+        hasData = true;
+      }
+    }
+
+    // End of month
+    for (var sym in holdingsAtEnd) {
+      if (holdingsAtEnd[sym] <= 0) continue;
+
+      var histData = allHistoricalPrices[sym];
+      if (!histData || histData.length === 0) continue;
+
+      var closestPrice = null;
+      for (var k = 0; k < histData.length; k++) {
+        var histDate = new Date(histData[k].date);
+        if (histDate <= monthEnd) closestPrice = histData[k].price;
+      }
+
+      if (closestPrice !== null) {
+        var eurRate = eurRates["USD"] || 1;
+        valueAtEnd += holdingsAtEnd[sym] * closestPrice * eurRate;
+        totalCostAtEnd += costAtEnd[sym] * eurRate;
+        hasData = true;
+      }
+    }
+
+    // Calculate P/L (change in unrealized profit)
+    var startPL = valueAtStart - totalCostAtStart;
+    var endPL = valueAtEnd - totalCostAtEnd;
+    var monthPL = endPL - startPL;
+
+    monthlyPL.push({
+      month: month,
+      value: hasData ? monthPL : 0,
+      hasData: hasData
+    });
+  }
+
+  return monthlyPL;
+}
+
+// Calculate per-stock attribution for a year
+async function calculateStockAttribution(year, allHistoricalPrices, eurRates) {
+  var transactions = await readTransactions();
+  if (transactions.length === 0) return [];
+
+  var holdings = await readHoldings();
+  var stockYearlyPL = {};
+
+  // Initialize all symbols
+  for (var h = 0; h < holdings.length; h++) {
+    stockYearlyPL[holdings[h].symbol] = 0;
+  }
+
+  // Calculate monthly P/L per stock for the entire year
+  var yearStart = new Date(year, 0, 1);
+  var yearEnd = new Date(year, 11, 31);
+  var yearStartStr = yearStart.toISOString().split("T")[0];
+  var yearEndStr = yearEnd.toISOString().split("T")[0];
+
+  for (var sym in stockYearlyPL) {
+    // Calculate holdings and cost at year boundaries
+    var holdingsAtStart = 0;
+    var costAtStart = 0;
+    var holdingsAtEnd = 0;
+    var costAtEnd = 0;
+
+    for (var t = 0; t < transactions.length; t++) {
+      if (transactions[t].symbol !== sym) continue;
+
+      if (transactions[t].date <= yearStartStr) {
+        holdingsAtStart += transactions[t].quantity;
+        costAtStart += transactions[t].quantity * transactions[t].price;
+      }
+
+      if (transactions[t].date <= yearEndStr) {
+        holdingsAtEnd += transactions[t].quantity;
+        costAtEnd += transactions[t].quantity * transactions[t].price;
+      }
+    }
+
+    // Get prices at boundaries
+    var histData = allHistoricalPrices[sym];
+    if (!histData || histData.length === 0) continue;
+
+    var priceAtStart = null;
+    var priceAtEnd = null;
+
+    for (var k = 0; k < histData.length; k++) {
+      var histDate = new Date(histData[k].date);
+      if (histDate <= yearStart) priceAtStart = histData[k].price;
+      if (histDate <= yearEnd) priceAtEnd = histData[k].price;
+    }
+
+    if (priceAtStart !== null && priceAtEnd !== null) {
+      var eurRate = eurRates["USD"] || 1;
+
+      var valueAtStart = holdingsAtStart * priceAtStart * eurRate;
+      var totalCostAtStart = costAtStart * eurRate;
+      var valueAtEnd = holdingsAtEnd * priceAtEnd * eurRate;
+      var totalCostAtEnd = costAtEnd * eurRate;
+
+      var startPL = valueAtStart - totalCostAtStart;
+      var endPL = valueAtEnd - totalCostAtEnd;
+
+      stockYearlyPL[sym] = endPL - startPL;
+    }
+  }
+
+  // Convert to array and calculate percentages
+  var totalPL = 0;
+  for (var sym in stockYearlyPL) {
+    totalPL += stockYearlyPL[sym];
+  }
+
+  var stockList = [];
+  for (var sym in stockYearlyPL) {
+    var pl = stockYearlyPL[sym];
+    var pct = totalPL !== 0 ? (pl / totalPL) * 100 : 0;
+    stockList.push({
+      symbol: sym,
+      yearlyPL: pl,
+      percentage: pct
+    });
+  }
+
+  // Sort by P/L descending
+  stockList.sort(function(a, b) {
+    return b.yearlyPL - a.yearlyPL;
+  });
+
+  return stockList;
+}
+
 
 
 // === lib/chart-renderer.js ===
 // chart-renderer.js - Canvas-based line chart drawing
 // Extracted from current script lines 454-515
+
+const COLORS = {
+  background: new Color("#000000"),
+  textPrimary: new Color("#FFFFFF"),
+  textSecondary: new Color("#8E8E93"),
+  graphLine: new Color("#30D158"),
+  graphLineNegative: new Color("#FF453A"),
+  axisLine: new Color("#3A3A3C")
+};
 
 // Draw line chart with axes and labels
 function drawGraph(context, data, x, y, width, height, leftMargin, bottomMargin) {
@@ -851,6 +1113,110 @@ function drawGraph(context, data, x, y, width, height, leftMargin, bottomMargin)
   context.setLineWidth(2);
   context.addPath(path);
   context.strokePath();
+}
+
+// Draw bar chart with gridlines for monthly P/L visualization
+function drawBarChart(context, monthlyData, x, y, width, height, leftMargin, bottomMargin) {
+  if (monthlyData.length !== 12) {
+    console.error("drawBarChart expects 12 months of data");
+    return;
+  }
+
+  var graphX = x + leftMargin;
+  var graphWidth = width - leftMargin;
+  var graphHeight = height - bottomMargin;
+
+  // Find min and max values (include 0 in range)
+  var values = monthlyData.map(function(d) { return d.value; });
+  var maxVal = Math.max.apply(null, values);
+  var minVal = Math.min.apply(null, values);
+
+  // Ensure 0 is in the range
+  maxVal = Math.max(maxVal, 0);
+  minVal = Math.min(minVal, 0);
+
+  // Add some padding to the range
+  var range = maxVal - minVal || 1;
+  maxVal = maxVal + range * 0.1;
+  minVal = minVal - range * 0.1;
+  range = maxVal - minVal;
+
+  // Calculate gridline interval (round to nice numbers)
+  var gridInterval = Math.pow(10, Math.floor(Math.log10(range / 4)));
+  if (range / gridInterval > 8) gridInterval *= 2;
+  if (range / gridInterval > 8) gridInterval *= 2.5;
+
+  // Draw horizontal gridlines
+  context.setStrokeColor(COLORS.axisLine);
+  context.setLineWidth(0.5);
+  context.setFont(Font.systemFont(8));
+  context.setTextColor(COLORS.textSecondary);
+
+  var gridValue = Math.ceil(minVal / gridInterval) * gridInterval;
+  while (gridValue <= maxVal) {
+    var gridY = y + graphHeight - ((gridValue - minVal) / range) * graphHeight;
+
+    // Draw gridline
+    var gridPath = new Path();
+    gridPath.move(new Point(graphX, gridY));
+    gridPath.addLine(new Point(graphX + graphWidth, gridY));
+    context.addPath(gridPath);
+    context.strokePath();
+
+    // Draw Y-axis label
+    var label = formatNumber(gridValue, false);
+    context.drawText(label, new Point(x, gridY - 5));
+
+    gridValue += gridInterval;
+  }
+
+  // Draw baseline (zero line) thicker
+  if (minVal < 0 && maxVal > 0) {
+    var zeroY = y + graphHeight - ((0 - minVal) / range) * graphHeight;
+    context.setStrokeColor(COLORS.textSecondary);
+    context.setLineWidth(1);
+    var zeroPath = new Path();
+    zeroPath.move(new Point(graphX, zeroY));
+    zeroPath.addLine(new Point(graphX + graphWidth, zeroY));
+    context.addPath(zeroPath);
+    context.strokePath();
+  }
+
+  // Draw bars
+  var barWidth = graphWidth / 12;
+  var barSpacing = barWidth * 0.2;
+  var actualBarWidth = barWidth - barSpacing;
+
+  for (var i = 0; i < 12; i++) {
+    var barX = graphX + i * barWidth + barSpacing / 2;
+    var value = monthlyData[i].value;
+
+    if (value === 0 || !monthlyData[i].hasData) continue;
+
+    // All bars extend upward from baseline
+    var baseline = y + graphHeight - ((0 - minVal) / range) * graphHeight;
+    var barHeight = Math.abs((value / range) * graphHeight);
+    var barY = baseline - barHeight;
+
+    // Color based on positive/negative
+    var barColor = value >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
+
+    // Draw bar
+    context.setFillColor(barColor);
+    var barRect = new Rect(barX, barY, actualBarWidth, barHeight);
+    context.fillRect(barRect);
+  }
+
+  // Draw month labels (J F M A M J J A S O N D)
+  var monthLabels = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+  context.setFont(Font.systemFont(10));
+  context.setTextColor(COLORS.textSecondary);
+
+  for (var i = 0; i < 12; i++) {
+    var labelX = graphX + i * barWidth + barWidth / 2 - 4;
+    var labelY = y + graphHeight + 5;
+    context.drawText(monthLabels[i], new Point(labelX, labelY));
+  }
 }
 
 
@@ -1077,6 +1443,102 @@ async function showInteractiveMenu(portfolio) {
   }
 }
 
+// Create large income widget layout
+async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalPL, avgPL) {
+  var widget = new ListWidget();
+  widget.backgroundColor = COLORS.background;
+  widget.setPadding(16, 16, 16, 16);
+
+  // Header: Total P/L
+  var headerText = widget.addText(formatCurrency(totalPL));
+  headerText.font = Font.boldSystemFont(32);
+  headerText.textColor = totalPL >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
+
+  widget.addSpacer(4);
+
+  // Subtitle: Average · Year
+  var subtitleStr = formatCurrency(avgPL) + "/mo · " + year;
+  var subtitleText = widget.addText(subtitleStr);
+  subtitleText.font = Font.systemFont(14);
+  subtitleText.textColor = COLORS.textSecondary;
+
+  widget.addSpacer(16);
+
+  // Bar chart
+  var chartHeight = 180;
+  var chartWidth = 340;
+  var chartImage = await drawBarChartImage(monthlyPL, chartWidth, chartHeight);
+  var chartImgWidget = widget.addImage(chartImage);
+  chartImgWidget.imageSize = new Size(chartWidth, chartHeight);
+
+  widget.addSpacer(16);
+
+  // Divider line
+  var dividerStack = widget.addStack();
+  dividerStack.layoutHorizontally();
+  dividerStack.addSpacer();
+  var divider = dividerStack.addText("─".repeat(40));
+  divider.font = Font.systemFont(8);
+  divider.textColor = COLORS.axisLine;
+  dividerStack.addSpacer();
+
+  widget.addSpacer(12);
+
+  // Stock breakdown (10 rows)
+  for (var i = 0; i < Math.min(10, stockAttribution.length); i++) {
+    var stock = stockAttribution[i];
+    var stockStack = widget.addStack();
+    stockStack.layoutHorizontally();
+    stockStack.centerAlignContent();
+
+    // Symbol (left-aligned, 80px width)
+    var symbolText = stockStack.addText(stock.symbol);
+    symbolText.font = Font.systemFont(12);
+    symbolText.textColor = COLORS.textPrimary;
+    symbolText.minimumScaleFactor = 0.8;
+    symbolText.lineLimit = 1;
+    stockStack.addSpacer(8);
+
+    // Spacer to push amount and % to the right
+    stockStack.addSpacer();
+
+    // Amount (right-aligned)
+    var plStr = (stock.yearlyPL >= 0 ? "+" : "") + formatCurrency(stock.yearlyPL);
+    var amountText = stockStack.addText(plStr);
+    amountText.font = Font.systemFont(12);
+    amountText.textColor = stock.yearlyPL >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
+    amountText.rightAlignText();
+
+    stockStack.addSpacer(12);
+
+    // Percentage
+    var pctStr = Math.round(stock.percentage) + "%";
+    var pctText = stockStack.addText(pctStr);
+    pctText.font = Font.systemFont(11);
+    pctText.textColor = COLORS.textSecondary;
+    pctText.rightAlignText();
+
+    if (i < 9) widget.addSpacer(6);
+  }
+
+  // Add tap URL to trigger refresh with next year
+  widget.url = "scriptable:///run/Income%20Widget?action=nextYear";
+
+  return widget;
+}
+
+// Helper: Draw bar chart to image
+async function drawBarChartImage(monthlyPL, width, height) {
+  var canvas = new DrawContext();
+  canvas.size = new Size(width, height);
+  canvas.opaque = false;
+  canvas.respectScreenScale = true;
+
+  drawBarChart(canvas, monthlyPL, 0, 0, width, height, 40, 20);
+
+  return canvas.getImage();
+}
+
 
 
 // === widget.js ===
@@ -1187,5 +1649,4 @@ async function main() {
 
 // Run main function
 await main();
-
 
