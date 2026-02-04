@@ -100,8 +100,13 @@ async function main() {
   var histStartDate = new Date(currentYear - 1, 11, 1);
   var allHistoricalPrices = await fetchMultipleHistoricalBatched(symbols, histStartDate);
 
-  // Calculate monthly P/L for current year
-  var monthlyPL = await calculateMonthlyPL(currentYear, allHistoricalPrices, eurRates);
+  // Ensure we have EUR rates for all needed currencies (same as income widget)
+  // The live API might return "GBp" instead of "GBP", so we need to ensure consistency
+  var standardCurrencies = ["USD", "GBP", "EUR"];
+  var monthlyEurRates = await fetchMultipleEURRates(standardCurrencies);
+
+  // Calculate monthly P/L for current year using standardized rates
+  var monthlyPL = await calculateMonthlyPL(currentYear, allHistoricalPrices, monthlyEurRates);
 
   // YTD = sum of all completed months plus current month
   var ytdPL = 0;

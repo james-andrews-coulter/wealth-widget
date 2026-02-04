@@ -1,4 +1,4 @@
-// Wealth Widget - Built 2026-02-04T08:40:51.063Z
+// Wealth Widget - Built 2026-02-04T08:57:41.975Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -1753,8 +1753,13 @@ async function main() {
   var histStartDate = new Date(currentYear - 1, 11, 1);
   var allHistoricalPrices = await fetchMultipleHistoricalBatched(symbols, histStartDate);
 
-  // Calculate monthly P/L for current year
-  var monthlyPL = await calculateMonthlyPL(currentYear, allHistoricalPrices, eurRates);
+  // Ensure we have EUR rates for all needed currencies (same as income widget)
+  // The live API might return "GBp" instead of "GBP", so we need to ensure consistency
+  var standardCurrencies = ["USD", "GBP", "EUR"];
+  var monthlyEurRates = await fetchMultipleEURRates(standardCurrencies);
+
+  // Calculate monthly P/L for current year using standardized rates
+  var monthlyPL = await calculateMonthlyPL(currentYear, allHistoricalPrices, monthlyEurRates);
 
   // YTD = sum of all completed months plus current month
   var ytdPL = 0;
