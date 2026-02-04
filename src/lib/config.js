@@ -9,14 +9,18 @@ const CONFIG = {
   gitRepoPath: "/Users/jamesalexander/wealth_widget/data"
 };
 
-// Detect if running in development (local) or production (widget)
+// Detect if running in development (local Mac) or production (iPhone/widget)
+// Only true if the git repo path actually exists (i.e., on development Mac)
 function isDevelopment() {
-  // When running as widget, config.runsInWidget is true
-  // In development/testing, it's typically false or undefined
-  return !config.runsInWidget;
+  try {
+    const localFm = FileManager.local();
+    return localFm.fileExists(CONFIG.gitRepoPath);
+  } catch (e) {
+    return false;
+  }
 }
 
-// Get FileManager instance (iCloud or local)
+// Get FileManager instance (local for Mac dev, iCloud for iPhone)
 function getFileManager() {
   if (isDevelopment()) {
     return FileManager.local();
@@ -30,21 +34,10 @@ function getDataPath() {
   const fm = getFileManager();
 
   if (isDevelopment()) {
-    // Development: Try local git repo, fall back to Scriptable documents
-    try {
-      // Check if git repo path exists and is accessible
-      if (fm.fileExists(CONFIG.gitRepoPath)) {
-        return CONFIG.gitRepoPath;
-      }
-    } catch (e) {
-      // Path not accessible, fall through to Scriptable docs
-    }
-
-    // Fallback: Use Scriptable documents directory
-    const docsDir = fm.documentsDirectory();
-    return fm.joinPath(docsDir, CONFIG.iCloudFolderName);
+    // Development Mac: Use git repo path
+    return CONFIG.gitRepoPath;
   } else {
-    // Production: Use iCloud
+    // iPhone/Production: Use iCloud
     const docsDir = fm.documentsDirectory();
     return fm.joinPath(docsDir, CONFIG.iCloudFolderName);
   }
