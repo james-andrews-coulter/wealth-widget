@@ -1,4 +1,4 @@
-// Wealth Widget - Built 2026-02-04T08:09:25.643Z
+// Wealth Widget - Built 2026-02-04T08:11:46.654Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -743,12 +743,49 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
   var today = new Date();
   var totalDays = Math.floor((today - firstDate) / (1000 * 60 * 60 * 24));
 
-  // Use monthly sampling for all data points (lighter widget)
+  // Build list of dates to sample: monthly intervals PLUS year boundaries
+  // This ensures YTD and yearly calculations have accurate boundary data
+  var sampleDates = [];
   var currentDate = new Date(firstDate);
   var interval = 30; // Monthly sampling
 
   while (currentDate <= today) {
-    var dateStr = currentDate.toISOString().split("T")[0];
+    sampleDates.push(new Date(currentDate));
+    currentDate = new Date(currentDate.getTime() + interval * 24 * 60 * 60 * 1000);
+  }
+
+  // Add year start dates (Jan 1 of each year from first year to current)
+  var firstYear = firstDate.getFullYear();
+  var currentYear = today.getFullYear();
+  for (var y = firstYear; y <= currentYear; y++) {
+    var yearStart = new Date(y, 0, 1);
+    if (yearStart >= firstDate && yearStart <= today) {
+      sampleDates.push(yearStart);
+    }
+  }
+
+  // Add month start dates for current year (for accurate MTD calculations)
+  for (var m = 0; m < 12; m++) {
+    var monthStart = new Date(currentYear, m, 1);
+    if (monthStart >= firstDate && monthStart <= today) {
+      sampleDates.push(monthStart);
+    }
+  }
+
+  // Sort and deduplicate
+  sampleDates.sort(function(a, b) { return a - b; });
+  var uniqueDates = [];
+  for (var i = 0; i < sampleDates.length; i++) {
+    var dateStr = sampleDates[i].toISOString().split("T")[0];
+    if (uniqueDates.length === 0 || uniqueDates[uniqueDates.length - 1] !== dateStr) {
+      uniqueDates.push(dateStr);
+    }
+  }
+
+  // Process each sample date
+  for (var idx = 0; idx < uniqueDates.length; idx++) {
+    var dateStr = uniqueDates[idx];
+    currentDate = new Date(dateStr);
 
     // Calculate portfolio value and cost at this date
     var holdingsAtDate = {};
@@ -790,9 +827,6 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
     }
 
     if (hasData) portfolioValues.push({ date: dateStr, value: dayValue, cost: dayCost });
-
-    // Advance by interval
-    currentDate = new Date(currentDate.getTime() + interval * 24 * 60 * 60 * 1000);
   }
 
   // FIX: Always add today's current portfolio value and cost as the final data point
