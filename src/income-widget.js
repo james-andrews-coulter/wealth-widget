@@ -104,21 +104,27 @@ async function main() {
   // Calculate stock attribution
   var stockAttribution = await calculateStockAttribution(displayYear, allHistoricalPrices, eurRates);
 
-  // Calculate total from stock attribution (ensures header matches table sum)
+  // Calculate total from monthlyPL (ensures header matches chart bars)
   var totalPL = 0;
-  for (var i = 0; i < stockAttribution.length; i++) {
-    totalPL += stockAttribution[i].yearlyPL;
-  }
-
-  // Calculate average per completed month
   var completedMonths = 0;
   for (var i = 0; i < monthlyPL.length; i++) {
     if (monthlyPL[i].hasData) {
+      totalPL += monthlyPL[i].value;
       completedMonths++;
     }
   }
 
   var avgPL = completedMonths > 0 ? totalPL / completedMonths : 0;
+
+  // Recalculate stock attribution percentages based on monthlyPL total
+  // (so percentages in table are relative to the displayed total)
+  var stockTotal = 0;
+  for (var i = 0; i < stockAttribution.length; i++) {
+    stockTotal += stockAttribution[i].yearlyPL;
+  }
+  for (var i = 0; i < stockAttribution.length; i++) {
+    stockAttribution[i].percentage = stockTotal !== 0 ? (stockAttribution[i].yearlyPL / stockTotal) * 100 : 0;
+  }
 
   // Render widget
   var widget = await createIncomeLargeWidget(displayYear, monthlyPL, stockAttribution, totalPL, avgPL);

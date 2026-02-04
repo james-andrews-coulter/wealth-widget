@@ -1,4 +1,4 @@
-// Income Widget - Built 2026-02-04T08:11:46.658Z
+// Income Widget - Built 2026-02-04T08:26:21.389Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -764,11 +764,28 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
     }
   }
 
-  // Add month start dates for current year (for accurate MTD calculations)
+  // Add month start AND end dates for current year (for accurate MTD calculations)
   for (var m = 0; m < 12; m++) {
     var monthStart = new Date(currentYear, m, 1);
+    var monthEnd = new Date(currentYear, m + 1, 0); // Last day of month
     if (monthStart >= firstDate && monthStart <= today) {
       sampleDates.push(monthStart);
+    }
+    if (monthEnd >= firstDate && monthEnd <= today) {
+      sampleDates.push(monthEnd);
+    }
+  }
+
+  // Also add month boundaries for previous year (for YTD calculations spanning year end)
+  var prevYear = currentYear - 1;
+  for (var m = 0; m < 12; m++) {
+    var monthStart = new Date(prevYear, m, 1);
+    var monthEnd = new Date(prevYear, m + 1, 0);
+    if (monthStart >= firstDate && monthStart <= today) {
+      sampleDates.push(monthStart);
+    }
+    if (monthEnd >= firstDate && monthEnd <= today) {
+      sampleDates.push(monthEnd);
     }
   }
 
@@ -1741,21 +1758,27 @@ async function main() {
   // Calculate stock attribution
   var stockAttribution = await calculateStockAttribution(displayYear, allHistoricalPrices, eurRates);
 
-  // Calculate total from stock attribution (ensures header matches table sum)
+  // Calculate total from monthlyPL (ensures header matches chart bars)
   var totalPL = 0;
-  for (var i = 0; i < stockAttribution.length; i++) {
-    totalPL += stockAttribution[i].yearlyPL;
-  }
-
-  // Calculate average per completed month
   var completedMonths = 0;
   for (var i = 0; i < monthlyPL.length; i++) {
     if (monthlyPL[i].hasData) {
+      totalPL += monthlyPL[i].value;
       completedMonths++;
     }
   }
 
   var avgPL = completedMonths > 0 ? totalPL / completedMonths : 0;
+
+  // Recalculate stock attribution percentages based on monthlyPL total
+  // (so percentages in table are relative to the displayed total)
+  var stockTotal = 0;
+  for (var i = 0; i < stockAttribution.length; i++) {
+    stockTotal += stockAttribution[i].yearlyPL;
+  }
+  for (var i = 0; i < stockAttribution.length; i++) {
+    stockAttribution[i].percentage = stockTotal !== 0 ? (stockAttribution[i].yearlyPL / stockTotal) * 100 : 0;
+  }
 
   // Render widget
   var widget = await createIncomeLargeWidget(displayYear, monthlyPL, stockAttribution, totalPL, avgPL);

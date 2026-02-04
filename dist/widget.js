@@ -1,4 +1,4 @@
-// Wealth Widget - Built 2026-02-04T08:11:46.654Z
+// Wealth Widget - Built 2026-02-04T08:26:21.385Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -764,11 +764,28 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
     }
   }
 
-  // Add month start dates for current year (for accurate MTD calculations)
+  // Add month start AND end dates for current year (for accurate MTD calculations)
   for (var m = 0; m < 12; m++) {
     var monthStart = new Date(currentYear, m, 1);
+    var monthEnd = new Date(currentYear, m + 1, 0); // Last day of month
     if (monthStart >= firstDate && monthStart <= today) {
       sampleDates.push(monthStart);
+    }
+    if (monthEnd >= firstDate && monthEnd <= today) {
+      sampleDates.push(monthEnd);
+    }
+  }
+
+  // Also add month boundaries for previous year (for YTD calculations spanning year end)
+  var prevYear = currentYear - 1;
+  for (var m = 0; m < 12; m++) {
+    var monthStart = new Date(prevYear, m, 1);
+    var monthEnd = new Date(prevYear, m + 1, 0);
+    if (monthStart >= firstDate && monthStart <= today) {
+      sampleDates.push(monthStart);
+    }
+    if (monthEnd >= firstDate && monthEnd <= today) {
+      sampleDates.push(monthEnd);
     }
   }
 
