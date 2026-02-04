@@ -1,4 +1,4 @@
-// Wealth Widget - Built 2026-02-04T01:16:09.640Z
+// Wealth Widget - Built 2026-02-04T01:24:46.490Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
