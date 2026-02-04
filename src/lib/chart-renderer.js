@@ -1,6 +1,15 @@
 // chart-renderer.js - Canvas-based line chart drawing
 // Extracted from current script lines 454-515
 
+const COLORS = {
+  background: new Color("#000000"),
+  textPrimary: new Color("#FFFFFF"),
+  textSecondary: new Color("#8E8E93"),
+  graphLine: new Color("#30D158"),
+  graphLineNegative: new Color("#FF453A"),
+  axisLine: new Color("#3A3A3C")
+};
+
 // Draw line chart with axes and labels
 function drawGraph(context, data, x, y, width, height, leftMargin, bottomMargin) {
   if (data.length < 2) return;
@@ -102,4 +111,108 @@ function drawGraph(context, data, x, y, width, height, leftMargin, bottomMargin)
   context.strokePath();
 }
 
-export { drawGraph };
+// Draw bar chart with gridlines for monthly P/L visualization
+function drawBarChart(context, monthlyData, x, y, width, height, leftMargin, bottomMargin) {
+  if (monthlyData.length !== 12) {
+    console.error("drawBarChart expects 12 months of data");
+    return;
+  }
+
+  var graphX = x + leftMargin;
+  var graphWidth = width - leftMargin;
+  var graphHeight = height - bottomMargin;
+
+  // Find min and max values (include 0 in range)
+  var values = monthlyData.map(function(d) { return d.value; });
+  var maxVal = Math.max.apply(null, values);
+  var minVal = Math.min.apply(null, values);
+
+  // Ensure 0 is in the range
+  maxVal = Math.max(maxVal, 0);
+  minVal = Math.min(minVal, 0);
+
+  // Add some padding to the range
+  var range = maxVal - minVal || 1;
+  maxVal = maxVal + range * 0.1;
+  minVal = minVal - range * 0.1;
+  range = maxVal - minVal;
+
+  // Calculate gridline interval (round to nice numbers)
+  var gridInterval = Math.pow(10, Math.floor(Math.log10(range / 4)));
+  if (range / gridInterval > 8) gridInterval *= 2;
+  if (range / gridInterval > 8) gridInterval *= 2.5;
+
+  // Draw horizontal gridlines
+  context.setStrokeColor(COLORS.axisLine);
+  context.setLineWidth(0.5);
+  context.setFont(Font.systemFont(8));
+  context.setTextColor(COLORS.textSecondary);
+
+  var gridValue = Math.ceil(minVal / gridInterval) * gridInterval;
+  while (gridValue <= maxVal) {
+    var gridY = y + graphHeight - ((gridValue - minVal) / range) * graphHeight;
+
+    // Draw gridline
+    var gridPath = new Path();
+    gridPath.move(new Point(graphX, gridY));
+    gridPath.addLine(new Point(graphX + graphWidth, gridY));
+    context.addPath(gridPath);
+    context.strokePath();
+
+    // Draw Y-axis label
+    var label = formatNumber(gridValue, false);
+    context.drawText(label, new Point(x, gridY - 5));
+
+    gridValue += gridInterval;
+  }
+
+  // Draw baseline (zero line) thicker
+  if (minVal < 0 && maxVal > 0) {
+    var zeroY = y + graphHeight - ((0 - minVal) / range) * graphHeight;
+    context.setStrokeColor(COLORS.textSecondary);
+    context.setLineWidth(1);
+    var zeroPath = new Path();
+    zeroPath.move(new Point(graphX, zeroY));
+    zeroPath.addLine(new Point(graphX + graphWidth, zeroY));
+    context.addPath(zeroPath);
+    context.strokePath();
+  }
+
+  // Draw bars
+  var barWidth = graphWidth / 12;
+  var barSpacing = barWidth * 0.2;
+  var actualBarWidth = barWidth - barSpacing;
+
+  for (var i = 0; i < 12; i++) {
+    var barX = graphX + i * barWidth + barSpacing / 2;
+    var value = monthlyData[i].value;
+
+    if (value === 0 || !monthlyData[i].hasData) continue;
+
+    // All bars extend upward from baseline
+    var baseline = y + graphHeight - ((0 - minVal) / range) * graphHeight;
+    var barHeight = Math.abs((value / range) * graphHeight);
+    var barY = baseline - barHeight;
+
+    // Color based on positive/negative
+    var barColor = value >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
+
+    // Draw bar
+    context.setFillColor(barColor);
+    var barRect = new Rect(barX, barY, actualBarWidth, barHeight);
+    context.fillRect(barRect);
+  }
+
+  // Draw month labels (J F M A M J J A S O N D)
+  var monthLabels = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+  context.setFont(Font.systemFont(10));
+  context.setTextColor(COLORS.textSecondary);
+
+  for (var i = 0; i < 12; i++) {
+    var labelX = graphX + i * barWidth + barWidth / 2 - 4;
+    var labelY = y + graphHeight + 5;
+    context.drawText(monthLabels[i], new Point(labelX, labelY));
+  }
+}
+
+export { drawGraph, drawBarChart };
