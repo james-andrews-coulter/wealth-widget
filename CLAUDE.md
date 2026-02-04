@@ -6,13 +6,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Scriptable iOS widget for tracking investment portfolios with real-time wealth visualization. The codebase uses a unique git-ready modular architecture that compiles to a single file for deployment to the Scriptable app.
 
+## Widgets
+
+### 1. Wealth Widget (`widget.js`)
+Portfolio overview with:
+- Total value, day/MTD-1/YTD changes
+- Holdings breakdown
+- Historical value chart
+
+### 2. Monthly Income Widget (`income-widget.js`)
+Monthly passive income visualization with:
+- Calendar year P/L bar chart
+- Per-stock attribution breakdown
+- Tap to cycle through historical years
+- State persisted in `data/income-widget-state.json`
+
+**State file:** `data/income-widget-state.json`
+- Format: `{ "yearOffset": 0 }`
+- Not committed to git (user-specific state)
+
 ## Build System
 
 ### Build Commands
 
 ```bash
-# Build the widget (concatenates all modules into dist/widget.js)
+# Build both widgets
 npm run build
+
+# Build specific widget
+npm run build:wealth
+npm run build:income
 
 # Watch mode for development
 npm run watch
@@ -34,7 +57,11 @@ The build system (`build.js`) concatenates source modules in dependency order an
 
 2. **ES6 Stripping**: All `export`/`import` statements are removed during build since Scriptable doesn't support ES6 modules. Functions become globally available in the concatenated output.
 
-3. **Output**: `dist/widget.js` is the deployable file that gets copied to the Scriptable app.
+3. **Output**:
+   - `dist/widget.js` - Portfolio wealth widget (existing)
+   - `dist/income-widget.js` - Monthly income widget (NEW)
+
+   Both widgets share the same lib modules but have different entry points.
 
 **IMPORTANT**:
 - Source files in `src/` use ES6 syntax but are for development only

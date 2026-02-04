@@ -21,3 +21,6 @@ node_modules/
 
 # Git worktrees
 .worktrees/
+
+# Widget state (user-specific)
+data/income-widget-state.json
