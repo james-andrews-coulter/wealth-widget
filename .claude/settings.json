@@ -1,0 +1,8 @@
+{
+  "hooks": {
+    "post-edit": [
+      { "command": "npm run lint:fix", "pattern": "src/**/*.js" },
+      { "command": "npm test", "pattern": "src/**/*.js" }
+    ]
+  }
+}

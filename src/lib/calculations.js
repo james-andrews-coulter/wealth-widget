@@ -87,8 +87,8 @@ function calculateMTD1PL(historicalValues) {
   var now = new Date();
   var lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
   var lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  var lastMonthEndStr = lastMonthEnd.toISOString().split("T")[0];
-  var lastMonthStartStr = lastMonthStart.toISOString().split("T")[0];
+  var lastMonthEndStr = lastMonthEnd.toISOString().split('T')[0];
+  var lastMonthStartStr = lastMonthStart.toISOString().split('T')[0];
 
   var startData = null, endData = null;
   for (var i = 0; i < historicalValues.length; i++) {
@@ -110,7 +110,7 @@ function calculateYTDPL(historicalValues) {
 
   var now = new Date();
   var yearStart = new Date(now.getFullYear(), 0, 1);
-  var yearStartStr = yearStart.toISOString().split("T")[0];
+  var yearStartStr = yearStart.toISOString().split('T')[0];
 
   var startData = null;
   for (var i = 0; i < historicalValues.length; i++) {
@@ -214,7 +214,7 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
   sampleDates.sort(function(a, b) { return a - b; });
   var uniqueDates = [];
   for (var i = 0; i < sampleDates.length; i++) {
-    var dateStr = sampleDates[i].toISOString().split("T")[0];
+    var dateStr = sampleDates[i].toISOString().split('T')[0];
     if (uniqueDates.length === 0 || uniqueDates[uniqueDates.length - 1] !== dateStr) {
       uniqueDates.push(dateStr);
     }
@@ -269,7 +269,7 @@ async function getHistoricalPortfolioValues(holdings, eurRates, currentPortfolio
 
   // FIX: Always add today's current portfolio value and cost as the final data point
   // This ensures YTD, MTD-1, and other metrics use up-to-date values
-  var todayStr = today.toISOString().split("T")[0];
+  var todayStr = today.toISOString().split('T')[0];
   var hasTodayValue = false;
 
   for (var i = 0; i < portfolioValues.length; i++) {
@@ -334,8 +334,8 @@ async function calculateMonthlyPL(year, allHistoricalPrices, eurRates) {
 
     var monthStart = new Date(year, month - 1, 1);
     var monthEnd = new Date(year, month, 0); // Last day of month
-    var monthStartStr = monthStart.toISOString().split("T")[0];
-    var monthEndStr = monthEnd.toISOString().split("T")[0];
+    var monthStartStr = monthStart.toISOString().split('T')[0];
+    var monthEndStr = monthEnd.toISOString().split('T')[0];
 
     // Calculate holdings and cost at month boundaries
     var holdingsAtStart = {};
@@ -459,8 +459,8 @@ async function calculateStockAttribution(year, allHistoricalPrices, eurRates) {
   // Calculate monthly P/L per stock for the entire year
   var yearStart = new Date(year, 0, 1);
   var yearEnd = new Date(year, 11, 31);
-  var yearStartStr = yearStart.toISOString().split("T")[0];
-  var yearEndStr = yearEnd.toISOString().split("T")[0];
+  var yearStartStr = yearStart.toISOString().split('T')[0];
+  var yearEndStr = yearEnd.toISOString().split('T')[0];
 
   for (var sym in stockYearlyPL) {
     // Calculate holdings and cost at year boundaries

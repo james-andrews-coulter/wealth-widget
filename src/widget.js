@@ -48,7 +48,7 @@ async function main() {
           price: latestPrice,
           previousClose: latestPrice, // Approximate
           change: 0,
-          currency: "USD", // Assume USD
+          currency: 'USD', // Assume USD
           error: false
         };
         allErrors = false;
@@ -57,7 +57,7 @@ async function main() {
   } else {
     // Online - cache new prices
     var newPrices = [];
-    var today = new Date().toISOString().split("T")[0];
+    var today = new Date().toISOString().split('T')[0];
 
     for (var sym in prices) {
       if (!prices[sym].error) {
@@ -102,7 +102,7 @@ async function main() {
 
   // Ensure we have EUR rates for all needed currencies (same as income widget)
   // The live API might return "GBp" instead of "GBP", so we need to ensure consistency
-  var standardCurrencies = ["USD", "GBP", "EUR"];
+  var standardCurrencies = ['USD', 'GBP', 'EUR'];
   var monthlyEurRates = await fetchMultipleEURRates(standardCurrencies);
 
   // Calculate monthly P/L for current year using standardized rates

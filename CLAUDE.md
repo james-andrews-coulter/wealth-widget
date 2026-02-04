@@ -146,6 +146,16 @@ This dual-path architecture is implemented in `src/lib/config.js` functions: `is
 - Test both development and production environments
 - Verify offline fallback behavior
 
+## Bug Fixing
+
+When fixing bugs, always verify the fix handles ALL edge cases mentioned in the bug report before marking complete. Test with multiple input variations (e.g., different currencies, positive/negative values, percentage vs absolute numbers).
+
+## Testing
+
+For financial/calculation code: Always test with edge cases including zero values, negative numbers, currency symbols ($, €, £), percentage signs, and mixed formats before considering a fix complete.
+
+After implementing a bug fix, create a minimal test case that reproduces the original bug and verify it passes before moving on.
+
 ## Data Files
 
 **Important**: Files in `/data/` are now symlinks to the real CSV stores that Scriptable uses on the device. They are no longer examples—modifications to these files directly affect the widget's data.

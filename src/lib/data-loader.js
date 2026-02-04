@@ -8,7 +8,7 @@ async function readTransactions() {
 
   // Create file if it doesn't exist
   if (!fm.fileExists(transactionsPath)) {
-    fm.writeString(transactionsPath, "symbol,quantity,price,date\n");
+    fm.writeString(transactionsPath, 'symbol,quantity,price,date\n');
     return [];
   }
 
@@ -18,15 +18,15 @@ async function readTransactions() {
   }
 
   const csvContent = fm.readString(transactionsPath);
-  const lines = csvContent.trim().split("\n");
+  const lines = csvContent.trim().split('\n');
   const transactions = [];
 
   // Parse CSV (skip header row)
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (line === "") continue;
+    if (line === '') continue;
 
-    const parts = line.split(",");
+    const parts = line.split(',');
     if (parts.length >= 4) {
       transactions.push({
         symbol: parts[0].trim().toUpperCase(),
@@ -87,14 +87,14 @@ function writeTransaction(symbol, quantity, price, date) {
   const fm = getFileManager();
   const transactionsPath = getTransactionsPath();
 
-  let content = "";
+  let content = '';
   if (!fm.fileExists(transactionsPath)) {
-    content = "symbol,quantity,price,date\n";
+    content = 'symbol,quantity,price,date\n';
   } else {
     content = fm.readString(transactionsPath);
   }
 
-  content += symbol.toUpperCase() + "," + quantity + "," + price + "," + date + "\n";
+  content += symbol.toUpperCase() + ',' + quantity + ',' + price + ',' + date + '\n';
   fm.writeString(transactionsPath, content);
 }
 
@@ -113,16 +113,16 @@ async function readPrices() {
   }
 
   const csvContent = fm.readString(pricesPath);
-  const lines = csvContent.trim().split("\n");
+  const lines = csvContent.trim().split('\n');
   const priceMap = {};
 
   // Parse CSV (skip header row)
   // Format: ticker,date,price
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (line === "") continue;
+    if (line === '') continue;
 
-    const parts = line.split(",");
+    const parts = line.split(',');
     if (parts.length >= 3) {
       const ticker = parts[0].trim().toUpperCase();
       const date = parts[1].trim();
@@ -152,9 +152,9 @@ async function appendPrices(newPrices) {
   const fm = getFileManager();
   const pricesPath = getPricesPath();
 
-  let content = "";
+  let content = '';
   if (!fm.fileExists(pricesPath)) {
-    content = "ticker,date,price\n";
+    content = 'ticker,date,price\n';
   } else {
     content = fm.readString(pricesPath);
   }
@@ -202,7 +202,7 @@ async function readIncomeWidgetState() {
   try {
     const fm = getFileManager();
     const dataPath = getDataPath();
-    const statePath = fm.joinPath(dataPath, "income-widget-state.json");
+    const statePath = fm.joinPath(dataPath, 'income-widget-state.json');
 
     if (!fm.fileExists(statePath)) {
       return { yearOffset: 0 };
@@ -212,7 +212,7 @@ async function readIncomeWidgetState() {
     const state = JSON.parse(content);
     return state;
   } catch (error) {
-    console.error("Error reading income widget state:", error);
+    console.error('Error reading income widget state:', error);
     return { yearOffset: 0 };
   }
 }
@@ -222,12 +222,12 @@ async function writeIncomeWidgetState(state) {
   try {
     const fm = getFileManager();
     const dataPath = getDataPath();
-    const statePath = fm.joinPath(dataPath, "income-widget-state.json");
+    const statePath = fm.joinPath(dataPath, 'income-widget-state.json');
 
     const content = JSON.stringify(state, null, 2);
     fm.writeString(statePath, content);
   } catch (error) {
-    console.error("Error writing income widget state:", error);
+    console.error('Error writing income widget state:', error);
   }
 }
 

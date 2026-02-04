@@ -3,14 +3,27 @@
   "version": "1.0.0",
   "description": "Git-ready Scriptable widget for tracking investment portfolio",
   "main": "src/widget.js",
+  "type": "module",
   "scripts": {
     "build": "node build.js",
     "build:wealth": "node build.js",
     "build:income": "node build.js",
-    "watch": "nodemon --watch src -e js --exec npm run build"
+    "watch": "nodemon --watch src -e js --exec npm run build",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
   },
-  "keywords": ["scriptable", "widget", "portfolio", "stocks"],
+  "keywords": [
+    "scriptable",
+    "widget",
+    "portfolio",
+    "stocks"
+  ],
   "author": "",
   "license": "MIT",
-  "devDependencies": {}
+  "devDependencies": {
+    "eslint": "^9.39.2",
+    "jest": "^30.2.0"
+  }
 }

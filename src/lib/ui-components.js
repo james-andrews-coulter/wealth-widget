@@ -11,7 +11,7 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   // Header
   var header = widget.addStack();
   header.layoutHorizontally();
-  var title = header.addText("Portfolio");
+  var title = header.addText('Portfolio');
   title.font = Font.boldSystemFont(16);
   title.textColor = COLORS.text;
   header.addSpacer();
@@ -28,7 +28,7 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   // Daily
   var dailyStack = plRow.addStack();
   dailyStack.layoutVertically();
-  var dailyLbl = dailyStack.addText("Day");
+  var dailyLbl = dailyStack.addText('Day');
   dailyLbl.font = Font.systemFont(9);
   dailyLbl.textColor = COLORS.textSecondary;
   var dailyVal = dailyStack.addText(formatNumber(portfolio.totalDayChangeEUR, true));
@@ -40,7 +40,7 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   // Month (MTD-1) - use pre-calculated value for consistency with income widget
   var monthStack = plRow.addStack();
   monthStack.layoutVertically();
-  var monthLbl = monthStack.addText("MTD-1");
+  var monthLbl = monthStack.addText('MTD-1');
   monthLbl.font = Font.systemFont(9);
   monthLbl.textColor = COLORS.textSecondary;
   var monthVal = monthStack.addText(formatNumber(mtd1PL, true));
@@ -52,7 +52,7 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   // YTD - use pre-calculated value for consistency with income widget
   var ytdStack = plRow.addStack();
   ytdStack.layoutVertically();
-  var ytdLbl = ytdStack.addText("YTD");
+  var ytdLbl = ytdStack.addText('YTD');
   ytdLbl.font = Font.systemFont(9);
   ytdLbl.textColor = COLORS.textSecondary;
   var ytdVal = ytdStack.addText(formatNumber(ytdPL, true));
@@ -64,7 +64,7 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   // All Time
   var allTimeStack = plRow.addStack();
   allTimeStack.layoutVertically();
-  var allTimeLbl = allTimeStack.addText("All");
+  var allTimeLbl = allTimeStack.addText('All');
   allTimeLbl.font = Font.systemFont(9);
   allTimeLbl.textColor = COLORS.textSecondary;
   var allTimeVal = allTimeStack.addText(formatNumber(portfolio.totalProfitLossEUR, true));
@@ -92,37 +92,37 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   var hdrRow = widget.addStack();
   hdrRow.layoutHorizontally();
 
-  var h1 = hdrRow.addText(padRight("Symbol", 6));
+  var h1 = hdrRow.addText(padRight('Symbol', 6));
   h1.font = Font.boldMonospacedSystemFont(9);
   h1.textColor = COLORS.textSecondary;
 
   hdrRow.addSpacer();
 
-  var h2 = hdrRow.addText(padLeft("Value", 7));
+  var h2 = hdrRow.addText(padLeft('Value', 7));
   h2.font = Font.boldMonospacedSystemFont(9);
   h2.textColor = COLORS.textSecondary;
 
   hdrRow.addSpacer();
 
-  var h3 = hdrRow.addText(padLeft("P/L", 6));
+  var h3 = hdrRow.addText(padLeft('P/L', 6));
   h3.font = Font.boldMonospacedSystemFont(9);
   h3.textColor = COLORS.textSecondary;
 
   hdrRow.addSpacer();
 
-  var h4 = hdrRow.addText(padLeft("A%", 5));
+  var h4 = hdrRow.addText(padLeft('A%', 5));
   h4.font = Font.boldMonospacedSystemFont(9);
   h4.textColor = COLORS.textSecondary;
 
   hdrRow.addSpacer();
 
-  var h5 = hdrRow.addText(padLeft("Time", 5));
+  var h5 = hdrRow.addText(padLeft('Time', 5));
   h5.font = Font.boldMonospacedSystemFont(9);
   h5.textColor = COLORS.textSecondary;
 
   hdrRow.addSpacer();
 
-  var h6 = hdrRow.addText(padLeft("Wt%", 4));
+  var h6 = hdrRow.addText(padLeft('Wt%', 4));
   h6.font = Font.boldMonospacedSystemFont(9);
   h6.textColor = COLORS.textSecondary;
 
@@ -154,19 +154,19 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
 
     row.addSpacer();
 
-    var ayTxt = row.addText(padLeft(holding.annualizedYield != null ? holding.annualizedYield.toFixed(1) : "N/A", 5));
+    var ayTxt = row.addText(padLeft(holding.annualizedYield != null ? holding.annualizedYield.toFixed(1) : 'N/A', 5));
     ayTxt.font = Font.regularMonospacedSystemFont(9);
     ayTxt.textColor = getChangeColor(holding.annualizedYield);
 
     row.addSpacer();
 
-    var timeTxt = row.addText(padLeft(holding.holdTimeYears != null ? holding.holdTimeYears.toFixed(1) + "y" : "N/A", 5));
+    var timeTxt = row.addText(padLeft(holding.holdTimeYears != null ? holding.holdTimeYears.toFixed(1) + 'y' : 'N/A', 5));
     timeTxt.font = Font.regularMonospacedSystemFont(9);
     timeTxt.textColor = COLORS.textSecondary;
 
     row.addSpacer();
 
-    var wtTxt = row.addText(padLeft(holding.portfolioPct !== null ? Math.round(holding.portfolioPct).toString() : "N/A", 4));
+    var wtTxt = row.addText(padLeft(holding.portfolioPct !== null ? Math.round(holding.portfolioPct).toString() : 'N/A', 4));
     wtTxt.font = Font.regularMonospacedSystemFont(9);
     wtTxt.textColor = COLORS.textSecondary;
 
@@ -178,7 +178,7 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
   // Footer
   var footer = widget.addStack();
   footer.layoutHorizontally();
-  var updTxt = footer.addText("Updated: " + new Date().toLocaleTimeString() + " (manual)");
+  var updTxt = footer.addText('Updated: ' + new Date().toLocaleTimeString() + ' (manual)');
   updTxt.font = Font.systemFont(8);
   updTxt.textColor = COLORS.textSecondary;
 
@@ -188,33 +188,33 @@ async function createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL) {
 // Show interactive menu (adapted for Shortcuts integration)
 async function showInteractiveMenu(portfolio) {
   var alert = new Alert();
-  alert.title = "Stock Portfolio";
-  alert.message = "Total: " + formatNumber(portfolio.totalValueEUR, false) + "\nToday: " + formatNumber(portfolio.totalDayChangeEUR, true);
+  alert.title = 'Stock Portfolio';
+  alert.message = 'Total: ' + formatNumber(portfolio.totalValueEUR, false) + '\nToday: ' + formatNumber(portfolio.totalDayChangeEUR, true);
 
   // Option 1: Refresh via Shortcut
-  alert.addAction("🔄 Refresh Prices");
+  alert.addAction('🔄 Refresh Prices');
 
   // Option 2: Add via Shortcut
-  alert.addAction("➕ Add Transaction");
+  alert.addAction('➕ Add Transaction');
 
   // Option 3: Edit in Files app
-  alert.addAction("✏️ Edit Data");
+  alert.addAction('✏️ Edit Data');
 
-  alert.addCancelAction("Close");
+  alert.addCancelAction('Close');
 
   var choice = await alert.present();
 
   if (choice === 0) {
     // Refresh Prices - Open Shortcut
-    await Safari.open("shortcuts://run-shortcut?name=RefreshPrices");
+    await Safari.open('shortcuts://run-shortcut?name=RefreshPrices');
   } else if (choice === 1) {
     // Add Transaction - Open Shortcut
-    await Safari.open("shortcuts://run-shortcut?name=AddTransaction");
+    await Safari.open('shortcuts://run-shortcut?name=AddTransaction');
   } else if (choice === 2) {
     // Edit Data - Open transactions file
     const fm = getFileManager();
     const transactionsPath = getTransactionsPath();
-    await Safari.open("shareddocuments://" + transactionsPath);
+    await Safari.open('shareddocuments://' + transactionsPath);
   }
 }
 
@@ -228,7 +228,7 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   // Header row - no currency symbols
   var header = widget.addStack();
   header.layoutHorizontally();
-  var totalStr = (totalPL >= 0 ? "+" : "") + formatNumber(totalPL, false);
+  var totalStr = (totalPL >= 0 ? '+' : '') + formatNumber(totalPL, false);
   var totalText = header.addText(totalStr);
   totalText.font = Font.boldSystemFont(18);
   totalText.textColor = totalPL >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
@@ -240,7 +240,7 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   widget.addSpacer(2);
 
   // Subtitle: Average/month - no currency symbols
-  var avgStr = (avgPL >= 0 ? "+" : "") + formatNumber(avgPL, false) + "/mo";
+  var avgStr = (avgPL >= 0 ? '+' : '') + formatNumber(avgPL, false) + '/mo';
   var subtitleText = widget.addText(avgStr);
   subtitleText.font = Font.systemFont(10);
   subtitleText.textColor = COLORS.textSecondary;
@@ -259,11 +259,11 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   // Stock breakdown header - removed weight column
   var hdrStack = widget.addStack();
   hdrStack.layoutHorizontally();
-  var hdr1 = hdrStack.addText("Stock");
+  var hdr1 = hdrStack.addText('Stock');
   hdr1.font = Font.boldSystemFont(9);
   hdr1.textColor = COLORS.textSecondary;
   hdrStack.addSpacer();
-  var hdr2 = hdrStack.addText("P/L");
+  var hdr2 = hdrStack.addText('P/L');
   hdr2.font = Font.boldSystemFont(9);
   hdr2.textColor = COLORS.textSecondary;
 
@@ -285,7 +285,7 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
     stockStack.addSpacer();
 
     // Amount - no currency symbol
-    var plStr = (stock.yearlyPL >= 0 ? "+" : "") + formatNumber(stock.yearlyPL, false);
+    var plStr = (stock.yearlyPL >= 0 ? '+' : '') + formatNumber(stock.yearlyPL, false);
     var amountText = stockStack.addText(plStr);
     amountText.font = Font.regularMonospacedSystemFont(9);
     amountText.textColor = stock.yearlyPL >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;

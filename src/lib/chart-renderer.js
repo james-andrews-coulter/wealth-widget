@@ -192,7 +192,7 @@ function drawBarChart(context, monthlyData, x, y, width, height, leftMargin, bot
   }
 
   // Draw month labels (J F M A M J J A S O N D)
-  var monthLabels = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+  var monthLabels = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
   context.setFont(Font.systemFont(10));
   context.setTextColor(COLORS.textSecondary);
 

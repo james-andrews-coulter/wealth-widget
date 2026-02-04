@@ -2,11 +2,11 @@
 // Enables git-ready development with iCloud production deployment
 
 const CONFIG = {
-  transactionsFileName: "transactions.csv",
-  pricesFileName: "prices.csv",
-  currencySymbol: "EUR",
-  iCloudFolderName: "WealthWidget",
-  gitRepoPath: "/Users/jamesalexander/wealth_widget/data"
+  transactionsFileName: 'transactions.csv',
+  pricesFileName: 'prices.csv',
+  currencySymbol: 'EUR',
+  iCloudFolderName: 'WealthWidget',
+  gitRepoPath: '/Users/jamesalexander/wealth_widget/data'
 };
 
 // Detect if running in development (local Mac) or production (iPhone/widget)
@@ -72,7 +72,7 @@ async function ensureDataDirectory() {
       await fm.downloadFileFromiCloud(dataPath);
     }
   } catch (e) {
-    console.error("Could not ensure data directory: " + e);
+    console.error('Could not ensure data directory: ' + e);
     // Directory might already exist or we don't have permissions
     // Try to continue anyway
   }

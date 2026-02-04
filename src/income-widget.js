@@ -26,9 +26,9 @@ async function handleYearCycle(availableYears) {
 // Main function
 async function main() {
   // Debug: Show what paths we're using
-  console.log("isDevelopment: " + isDevelopment());
-  console.log("Data path: " + getDataPath());
-  console.log("Transactions path: " + getTransactionsPath());
+  console.log('isDevelopment: ' + isDevelopment());
+  console.log('Data path: ' + getDataPath());
+  console.log('Transactions path: ' + getTransactionsPath());
 
   // Ensure data directory exists
   await ensureDataDirectory();
@@ -37,7 +37,7 @@ async function main() {
   var state = await readIncomeWidgetState();
   var transactions = await readTransactions();
 
-  console.log("Transactions count: " + transactions.length);
+  console.log('Transactions count: ' + transactions.length);
 
   var availableYears = getYearsFromTransactions(transactions);
 
@@ -50,14 +50,14 @@ async function main() {
   // Sort years in descending order (newest first)
   availableYears.sort(function(a, b) { return b - a; });
 
-  console.log("Available years: " + JSON.stringify(availableYears));
-  console.log("Initial state.yearOffset: " + state.yearOffset);
+  console.log('Available years: ' + JSON.stringify(availableYears));
+  console.log('Initial state.yearOffset: ' + state.yearOffset);
 
   if (availableYears.length === 0) {
     // No transaction data
     var errorWidget = new ListWidget();
     errorWidget.backgroundColor = COLORS.background;
-    var errorText = errorWidget.addText("No transaction data found");
+    var errorText = errorWidget.addText('No transaction data found');
     errorText.textColor = COLORS.textPrimary;
     errorText.font = Font.systemFont(14);
     Script.setWidget(errorWidget);
@@ -72,7 +72,7 @@ async function main() {
   if (isInteraction) {
     await handleYearCycle(availableYears);
     state = await readIncomeWidgetState(); // Re-read updated state
-    console.log("After cycle state.yearOffset: " + state.yearOffset);
+    console.log('After cycle state.yearOffset: ' + state.yearOffset);
   }
 
   // Calculate which year to display
@@ -88,7 +88,7 @@ async function main() {
   }
 
   // Fetch EUR exchange rates
-  var currencies = ["USD", "GBP", "EUR"];
+  var currencies = ['USD', 'GBP', 'EUR'];
   var eurRates = await fetchMultipleEURRates(currencies);
 
   // Fetch historical prices for the entire year
@@ -132,7 +132,7 @@ async function main() {
   // Set the widget for home screen
   Script.setWidget(widget);
 
-  console.log("Displaying year: " + displayYear);
+  console.log('Displaying year: ' + displayYear);
 
   // DO NOT call widget.presentLarge() - that opens Scriptable
   // The widget will update silently on the home screen

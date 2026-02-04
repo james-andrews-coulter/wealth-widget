@@ -3,11 +3,11 @@
 
 // Fetch current price for a single stock
 async function fetchStockPrice(symbol) {
-  const url = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol + "?interval=1d&range=1d";
+  const url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '?interval=1d&range=1d';
 
   try {
     const request = new Request(url);
-    request.headers = { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)" };
+    request.headers = { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)' };
     const response = await request.loadJSON();
 
     if (response.chart && response.chart.result && response.chart.result[0]) {
@@ -20,13 +20,13 @@ async function fetchStockPrice(symbol) {
         price: currentPrice,
         previousClose: previousClose,
         change: currentPrice - previousClose,
-        currency: meta.currency || "USD",
+        currency: meta.currency || 'USD',
         marketState: meta.marketState,
         error: false
       };
     }
 
-    throw new Error("Invalid response");
+    throw new Error('Invalid response');
   } catch (error) {
     return { symbol: symbol, price: null, error: true };
   }
@@ -36,11 +36,11 @@ async function fetchStockPrice(symbol) {
 async function fetchHistoricalData(symbol, startDate) {
   const start = Math.floor(new Date(startDate).getTime() / 1000);
   const end = Math.floor(Date.now() / 1000);
-  const url = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol + "?period1=" + start + "&period2=" + end + "&interval=1d";
+  const url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '?period1=' + start + '&period2=' + end + '&interval=1d';
 
   try {
     const request = new Request(url);
-    request.headers = { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)" };
+    request.headers = { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)' };
     const response = await request.loadJSON();
 
     if (response.chart && response.chart.result && response.chart.result[0]) {
@@ -69,13 +69,13 @@ async function fetchHistoricalData(symbol, startDate) {
 
 // Fetch EUR exchange rate for a currency
 async function getEURRate(currency) {
-  if (currency === "EUR") return 1;
+  if (currency === 'EUR') return 1;
 
-  const url = "https://query1.finance.yahoo.com/v8/finance/chart/" + currency + "EUR=X?interval=1d&range=1d";
+  const url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + currency + 'EUR=X?interval=1d&range=1d';
 
   try {
     const request = new Request(url);
-    request.headers = { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)" };
+    request.headers = { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)' };
     const response = await request.loadJSON();
 
     if (response.chart && response.chart.result && response.chart.result[0]) {
