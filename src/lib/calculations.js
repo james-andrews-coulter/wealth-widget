@@ -253,9 +253,16 @@ function getYearsFromTransactions(transactions) {
 // Calculate monthly P/L for a given year
 async function calculateMonthlyPL(year, allHistoricalPrices, eurRates) {
   var transactions = await readTransactions();
-  if (transactions.length === 0) return [];
 
   var monthlyPL = [];
+
+  // If no transactions at all, return 12 months of empty data
+  if (transactions.length === 0) {
+    for (var m = 1; m <= 12; m++) {
+      monthlyPL.push({ month: m, value: 0, hasData: false });
+    }
+    return monthlyPL;
+  }
 
   // Get current date info for future month check
   var now = new Date();
@@ -363,6 +370,11 @@ async function calculateMonthlyPL(year, allHistoricalPrices, eurRates) {
       value: hasData ? monthPL : 0,
       hasData: hasData
     });
+  }
+
+  // Safety check: ensure we always have 12 months
+  while (monthlyPL.length < 12) {
+    monthlyPL.push({ month: monthlyPL.length + 1, value: 0, hasData: false });
   }
 
   return monthlyPL;

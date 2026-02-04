@@ -104,9 +104,20 @@ function drawGraph(context, data, x, y, width, height, leftMargin, bottomMargin)
 
 // Draw bar chart with gridlines for monthly P/L visualization
 function drawBarChart(context, monthlyData, x, y, width, height, leftMargin, bottomMargin) {
-  if (monthlyData.length !== 12) {
-    console.error("drawBarChart expects 12 months of data");
-    return;
+  // Ensure we have exactly 12 months of data
+  if (!monthlyData || monthlyData.length === 0) {
+    monthlyData = [];
+    for (var i = 1; i <= 12; i++) {
+      monthlyData.push({ month: i, value: 0, hasData: false });
+    }
+  }
+
+  while (monthlyData.length < 12) {
+    monthlyData.push({ month: monthlyData.length + 1, value: 0, hasData: false });
+  }
+
+  if (monthlyData.length > 12) {
+    monthlyData = monthlyData.slice(0, 12);
   }
 
   var graphX = x + leftMargin;
