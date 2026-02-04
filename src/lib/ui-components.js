@@ -226,7 +226,9 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   widget.setPadding(16, 8, 16, 8);
 
   // Enable tap to cycle through years
-  widget.url = URLScheme.forRunningScript() + "&action=nextYear";
+  var baseUrl = URLScheme.forRunningScript();
+  var separator = baseUrl.indexOf("?") > -1 ? "&" : "?";
+  widget.url = baseUrl + separator + "action=nextYear";
 
   // Header row
   var header = widget.addStack();

@@ -1,4 +1,4 @@
-// Wealth Widget - Built 2026-02-04T01:46:34.075Z
+// Wealth Widget - Built 2026-02-04T01:57:15.546Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -1456,7 +1456,9 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   widget.setPadding(16, 8, 16, 8);
 
   // Enable tap to cycle through years
-  widget.url = URLScheme.forRunningScript() + "&action=nextYear";
+  var baseUrl = URLScheme.forRunningScript();
+  var separator = baseUrl.indexOf("?") > -1 ? "&" : "?";
+  widget.url = baseUrl + separator + "action=nextYear";
 
   // Header row
   var header = widget.addStack();

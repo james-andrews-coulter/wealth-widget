@@ -1,4 +1,4 @@
-// Income Widget - Built 2026-02-04T01:46:34.078Z
+// Income Widget - Built 2026-02-04T01:57:15.548Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -1456,7 +1456,9 @@ async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalP
   widget.setPadding(16, 8, 16, 8);
 
   // Enable tap to cycle through years
-  widget.url = URLScheme.forRunningScript() + "&action=nextYear";
+  var baseUrl = URLScheme.forRunningScript();
+  var separator = baseUrl.indexOf("?") > -1 ? "&" : "?";
+  widget.url = baseUrl + separator + "action=nextYear";
 
   // Header row
   var header = widget.addStack();
@@ -1583,10 +1585,14 @@ async function handleYearCycle() {
 // Main function
 async function main() {
   // Check if this is a tap interaction
-  var isInteraction = args.queryParameters && args.queryParameters.action === "nextYear";
+  var isInteraction = false;
+  if (typeof args !== "undefined" && args.queryParameters) {
+    isInteraction = args.queryParameters.action === "nextYear";
+  }
 
   if (isInteraction) {
     await handleYearCycle();
+    // After cycling, refresh widget to show new year
   }
 
   // Ensure data directory exists
@@ -1596,6 +1602,13 @@ async function main() {
   var state = await readIncomeWidgetState();
   var transactions = await readTransactions();
   var availableYears = getYearsFromTransactions(transactions);
+
+  // Always include current year
+  var currentYear = new Date().getFullYear();
+  if (availableYears.indexOf(currentYear) === -1) {
+    availableYears.push(currentYear);
+    availableYears.sort();
+  }
 
   if (availableYears.length === 0) {
     // No transaction data
@@ -1609,7 +1622,7 @@ async function main() {
     return;
   }
 
-  // Calculate which year to display
+  // Calculate which year to display (default to current year, offset=0)
   var yearIndex = state.yearOffset % availableYears.length;
   var displayYear = availableYears[availableYears.length - 1 - yearIndex];
 
