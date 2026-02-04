@@ -1,4 +1,4 @@
-// Income Widget - Built 2026-02-04T07:44:04.398Z
+// Income Widget - Built 2026-02-04T07:57:39.746Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -899,48 +899,52 @@ async function calculateMonthlyPL(year, allHistoricalPrices, eurRates) {
     var totalCostAtEnd = 0;
     var hasData = false;
 
-    // Start of month
-    for (var sym in holdingsAtStart) {
-      if (holdingsAtStart[sym] <= 0) continue;
+    // Get all unique symbols from both start and end
+    var allSymbols = {};
+    for (var sym in holdingsAtStart) allSymbols[sym] = true;
+    for (var sym in holdingsAtEnd) allSymbols[sym] = true;
+
+    // Process each symbol consistently
+    for (var sym in allSymbols) {
+      var qtyAtStart = holdingsAtStart[sym] || 0;
+      var qtyAtEnd = holdingsAtEnd[sym] || 0;
+      var cAtStart = costAtStart[sym] || 0;
+      var cAtEnd = costAtEnd[sym] || 0;
+
+      // Skip if no holdings at either boundary
+      if (qtyAtStart <= 0 && qtyAtEnd <= 0) continue;
 
       var histData = allHistoricalPrices[sym];
       if (!histData || histData.length === 0) continue;
 
-      var closestPrice = null;
+      // Find prices at both boundaries
+      var priceAtStart = null;
+      var priceAtEnd = null;
       for (var k = 0; k < histData.length; k++) {
         var histDate = new Date(histData[k].date);
-        if (histDate <= monthStart) closestPrice = histData[k].price;
+        if (histDate <= monthStart) priceAtStart = histData[k].price;
+        if (histDate <= monthEnd) priceAtEnd = histData[k].price;
       }
 
-      if (closestPrice !== null) {
-        // Use per-symbol currency for correct conversion
-        var symCurrency = getCurrencyFromSymbol(sym);
-        var eurRate = eurRates[symCurrency] || 1;
-        valueAtStart += holdingsAtStart[sym] * closestPrice * eurRate;
-        totalCostAtStart += costAtStart[sym] * eurRate;
-        hasData = true;
-      }
-    }
+      // Need end price to calculate anything
+      if (priceAtEnd === null) continue;
 
-    // End of month
-    for (var sym in holdingsAtEnd) {
-      if (holdingsAtEnd[sym] <= 0) continue;
+      // If holdings at start but no start price, skip (can't calculate properly)
+      if (qtyAtStart > 0 && priceAtStart === null) continue;
 
-      var histData = allHistoricalPrices[sym];
-      if (!histData || histData.length === 0) continue;
+      var symCurrency = getCurrencyFromSymbol(sym);
+      var eurRate = eurRates[symCurrency] || 1;
 
-      var closestPrice = null;
-      for (var k = 0; k < histData.length; k++) {
-        var histDate = new Date(histData[k].date);
-        if (histDate <= monthEnd) closestPrice = histData[k].price;
+      // For start: if no holdings, value is 0 regardless of price
+      if (qtyAtStart > 0 && priceAtStart !== null) {
+        valueAtStart += qtyAtStart * priceAtStart * eurRate;
+        totalCostAtStart += cAtStart * eurRate;
       }
 
-      if (closestPrice !== null) {
-        // Use per-symbol currency for correct conversion
-        var symCurrency = getCurrencyFromSymbol(sym);
-        var eurRate = eurRates[symCurrency] || 1;
-        valueAtEnd += holdingsAtEnd[sym] * closestPrice * eurRate;
-        totalCostAtEnd += costAtEnd[sym] * eurRate;
+      // For end: add value and cost
+      if (qtyAtEnd > 0) {
+        valueAtEnd += qtyAtEnd * priceAtEnd * eurRate;
+        totalCostAtEnd += cAtEnd * eurRate;
         hasData = true;
       }
     }
@@ -1018,21 +1022,27 @@ async function calculateStockAttribution(year, allHistoricalPrices, eurRates) {
       if (histDate <= yearEnd) priceAtEnd = histData[k].price;
     }
 
-    if (priceAtStart !== null && priceAtEnd !== null) {
-      // Use per-symbol currency for correct conversion
-      var symCurrency = getCurrencyFromSymbol(sym);
-      var eurRate = eurRates[symCurrency] || 1;
+    // Skip if no end price (can't calculate current value)
+    if (priceAtEnd === null) continue;
 
-      var valueAtStart = holdingsAtStart * priceAtStart * eurRate;
-      var totalCostAtStart = costAtStart * eurRate;
-      var valueAtEnd = holdingsAtEnd * priceAtEnd * eurRate;
-      var totalCostAtEnd = costAtEnd * eurRate;
+    // If we have holdings at start but no price, we can't calculate - skip
+    // But if holdingsAtStart is 0 (new position), we don't need priceAtStart
+    if (priceAtStart === null && holdingsAtStart > 0) continue;
 
-      var startPL = valueAtStart - totalCostAtStart;
-      var endPL = valueAtEnd - totalCostAtEnd;
+    // Use per-symbol currency for correct conversion
+    var symCurrency = getCurrencyFromSymbol(sym);
+    var eurRate = eurRates[symCurrency] || 1;
 
-      stockYearlyPL[sym] = endPL - startPL;
-    }
+    // For new positions (zero holdings at start), valueAtStart = 0 regardless of price
+    var valueAtStart = (holdingsAtStart > 0 && priceAtStart !== null) ? holdingsAtStart * priceAtStart * eurRate : 0;
+    var totalCostAtStart = costAtStart * eurRate;
+    var valueAtEnd = holdingsAtEnd * priceAtEnd * eurRate;
+    var totalCostAtEnd = costAtEnd * eurRate;
+
+    var startPL = valueAtStart - totalCostAtStart;
+    var endPL = valueAtEnd - totalCostAtEnd;
+
+    stockYearlyPL[sym] = endPL - startPL;
   }
 
   // Convert to array and calculate percentages
