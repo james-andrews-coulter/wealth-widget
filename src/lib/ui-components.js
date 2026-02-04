@@ -223,78 +223,85 @@ async function showInteractiveMenu(portfolio) {
 async function createIncomeLargeWidget(year, monthlyPL, stockAttribution, totalPL, avgPL) {
   var widget = new ListWidget();
   widget.backgroundColor = COLORS.background;
-  widget.setPadding(16, 16, 16, 16);
+  widget.setPadding(16, 8, 16, 8);
 
-  // Header: Total P/L
-  var headerText = widget.addText(formatCurrency(totalPL));
-  headerText.font = Font.boldSystemFont(32);
-  headerText.textColor = totalPL >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
+  // Header row
+  var header = widget.addStack();
+  header.layoutHorizontally();
+  var totalText = header.addText(formatCurrency(totalPL));
+  totalText.font = Font.boldSystemFont(18);
+  totalText.textColor = totalPL >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
+  header.addSpacer();
+  var yearText = header.addText(year.toString());
+  yearText.font = Font.systemFont(12);
+  yearText.textColor = COLORS.textSecondary;
 
-  widget.addSpacer(4);
+  widget.addSpacer(2);
 
-  // Subtitle: Average · Year
-  var subtitleStr = formatCurrency(avgPL) + "/mo · " + year;
+  // Subtitle: Average/month
+  var subtitleStr = formatCurrency(avgPL) + "/mo";
   var subtitleText = widget.addText(subtitleStr);
-  subtitleText.font = Font.systemFont(14);
+  subtitleText.font = Font.systemFont(10);
   subtitleText.textColor = COLORS.textSecondary;
 
   widget.addSpacer(8);
 
   // Bar chart
-  var chartHeight = 120;
-  var chartWidth = 340;
+  var chartHeight = 100;
+  var chartWidth = 300;
   var chartImage = await drawBarChartImage(monthlyPL, chartWidth, chartHeight);
   var chartImgWidget = widget.addImage(chartImage);
   chartImgWidget.imageSize = new Size(chartWidth, chartHeight);
 
   widget.addSpacer(8);
 
-  // Divider line
-  var dividerStack = widget.addStack();
-  dividerStack.layoutHorizontally();
-  dividerStack.addSpacer();
-  var divider = dividerStack.addText("─".repeat(40));
-  divider.font = Font.systemFont(8);
-  divider.textColor = COLORS.axisLine;
-  dividerStack.addSpacer();
+  // Stock breakdown header
+  var hdrStack = widget.addStack();
+  hdrStack.layoutHorizontally();
+  var hdr1 = hdrStack.addText("Stock");
+  hdr1.font = Font.boldSystemFont(9);
+  hdr1.textColor = COLORS.textSecondary;
+  hdrStack.addSpacer();
+  var hdr2 = hdrStack.addText("P/L");
+  hdr2.font = Font.boldSystemFont(9);
+  hdr2.textColor = COLORS.textSecondary;
+  hdrStack.addSpacer(4);
+  var hdr3 = hdrStack.addText("Wt%");
+  hdr3.font = Font.boldSystemFont(9);
+  hdr3.textColor = COLORS.textSecondary;
 
-  widget.addSpacer(8);
+  widget.addSpacer(4);
 
-  // Stock breakdown (6 rows)
-  for (var i = 0; i < Math.min(6, stockAttribution.length); i++) {
+  // Stock breakdown (up to 11 rows to match wealth widget)
+  for (var i = 0; i < Math.min(11, stockAttribution.length); i++) {
     var stock = stockAttribution[i];
     var stockStack = widget.addStack();
     stockStack.layoutHorizontally();
     stockStack.centerAlignContent();
 
-    // Symbol (left-aligned, 80px width)
+    // Symbol
     var symbolText = stockStack.addText(stock.symbol);
-    symbolText.font = Font.systemFont(12);
-    symbolText.textColor = COLORS.textPrimary;
-    symbolText.minimumScaleFactor = 0.8;
-    symbolText.lineLimit = 1;
-    stockStack.addSpacer(8);
+    symbolText.font = Font.boldMonospacedSystemFont(9);
+    symbolText.textColor = COLORS.text;
 
     // Spacer to push amount and % to the right
     stockStack.addSpacer();
 
-    // Amount (right-aligned)
+    // Amount
     var plStr = (stock.yearlyPL >= 0 ? "+" : "") + formatCurrency(stock.yearlyPL);
     var amountText = stockStack.addText(plStr);
-    amountText.font = Font.systemFont(12);
+    amountText.font = Font.regularMonospacedSystemFont(9);
     amountText.textColor = stock.yearlyPL >= 0 ? COLORS.graphLine : COLORS.graphLineNegative;
-    amountText.rightAlignText();
 
-    stockStack.addSpacer(12);
+    stockStack.addSpacer(4);
 
     // Percentage
     var pctStr = Math.round(stock.percentage) + "%";
     var pctText = stockStack.addText(pctStr);
-    pctText.font = Font.systemFont(11);
+    pctText.font = Font.regularMonospacedSystemFont(9);
     pctText.textColor = COLORS.textSecondary;
-    pctText.rightAlignText();
 
-    if (i < 5) widget.addSpacer(4);
+    widget.addSpacer(2);
   }
 
   // Add tap URL to trigger refresh with next year
