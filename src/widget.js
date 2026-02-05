@@ -100,18 +100,20 @@ async function main() {
   console.log('[WEALTH] About to render widget, runsInWidget=' + config.runsInWidget);
   console.log('[WEALTH] ytdPL=' + ytdPL + ', mtd1PL=' + mtd1PL);
 
-  // Render widget or show menu
+  // ALWAYS create and set the widget (for home screen)
+  // Then show preview or menu based on run context
   try {
-    if (config.runsInWidget) {
-      console.log('[WEALTH] Creating large widget...');
-      var widget = await createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL);
-      console.log('[WEALTH] Widget created, setting...');
-      Script.setWidget(widget);
-      console.log('[WEALTH] Widget set successfully');
-    } else {
-      console.log('[WEALTH] Showing interactive menu...');
-      await showInteractiveMenu(portfolio);
-      console.log('[WEALTH] Menu shown');
+    console.log('[WEALTH] Creating large widget...');
+    var widget = await createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL);
+    console.log('[WEALTH] Widget created successfully');
+    Script.setWidget(widget);
+    console.log('[WEALTH] Widget set for home screen');
+
+    if (!config.runsInWidget) {
+      // Running manually - show widget preview so we can see it
+      console.log('[WEALTH] Previewing widget...');
+      await widget.presentLarge();
+      console.log('[WEALTH] Preview shown');
     }
   } catch (e) {
     console.log('[WEALTH] ERROR: ' + e.message);
@@ -122,6 +124,9 @@ async function main() {
     var errorText = errorWidget.addText('Error: ' + e.message);
     errorText.textColor = Color.white();
     Script.setWidget(errorWidget);
+    if (!config.runsInWidget) {
+      await errorWidget.presentLarge();
+    }
   }
 
   Script.complete();
