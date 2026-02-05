@@ -1,4 +1,4 @@
-// Wealth Widget - Built 2026-02-04T23:10:06.841Z
+// Wealth Widget - Built 2026-02-05T06:15:21.298Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
@@ -1820,12 +1820,31 @@ async function main() {
   var ytdPL = metrics.ytdPL;
   var mtd1PL = metrics.mtd1PL;
 
+  console.log('[WEALTH] About to render widget, runsInWidget=' + config.runsInWidget);
+  console.log('[WEALTH] ytdPL=' + ytdPL + ', mtd1PL=' + mtd1PL);
+
   // Render widget or show menu
-  if (config.runsInWidget) {
-    var widget = await createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL);
-    Script.setWidget(widget);
-  } else {
-    await showInteractiveMenu(portfolio);
+  try {
+    if (config.runsInWidget) {
+      console.log('[WEALTH] Creating large widget...');
+      var widget = await createLargeWidget(portfolio, historicalValues, ytdPL, mtd1PL);
+      console.log('[WEALTH] Widget created, setting...');
+      Script.setWidget(widget);
+      console.log('[WEALTH] Widget set successfully');
+    } else {
+      console.log('[WEALTH] Showing interactive menu...');
+      await showInteractiveMenu(portfolio);
+      console.log('[WEALTH] Menu shown');
+    }
+  } catch (e) {
+    console.log('[WEALTH] ERROR: ' + e.message);
+    console.log('[WEALTH] Stack: ' + e.stack);
+    // Show error in widget
+    var errorWidget = new ListWidget();
+    errorWidget.backgroundColor = new Color('#FF0000');
+    var errorText = errorWidget.addText('Error: ' + e.message);
+    errorText.textColor = Color.white();
+    Script.setWidget(errorWidget);
   }
 
   Script.complete();

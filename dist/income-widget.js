@@ -1,4 +1,4 @@
-// Income Widget - Built 2026-02-04T23:10:06.844Z
+// Income Widget - Built 2026-02-05T06:15:21.301Z
 // Auto-generated - Do not edit directly. Edit source files in src/
 
 // === lib/config.js ===
